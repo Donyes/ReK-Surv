@@ -10,7 +10,7 @@ This repository implements ReK-Surv, a survival analysis model based on Kolmogor
 
 - **B-spline Activation Functions**: Learnable univariate functions using B-spline basis
 - **Residual Connections**: Identity shortcuts for same-dimension layers
-- **Proximal L1 Regularization**: Soft thresholding for sparsity
+- **Elastic Net Regularization**: L1 via proximal soft-thresholding + L2 via weight decay
 - **Cox Partial Likelihood Loss**: Standard survival analysis objective
 
 ## Installation
@@ -90,10 +90,17 @@ output = base_activation(x) @ base_weight + B_splines(x) @ spline_weight + resid
 |-----------|-------------|-------------------|
 | grid_size | B-spline grid intervals | 1 |
 | spline_order | B-spline order | 3 |
-| tau | L1 regularization (proximal) | 0.25 |
-| wd | L2 regularization (weight decay) | 0.5 |
+| tau | L1 regularization (proximal soft-thresholding) | 0.25 |
+| wd | L2 regularization (AdamW weight decay) | 0.5 |
 | depth | Number of hidden layers | 2 |
 | width | Hidden layer width | 1 |
+
+### Elastic Net Regularization
+
+The model uses Elastic Net regularization combining L1 and L2 penalties:
+
+- **L1 (τ)**: Implemented via proximal gradient method (soft-thresholding) applied after each optimizer step
+- **L2 (wd)**: Implemented via AdamW optimizer's built-in weight decay
 
 ## Citation
 
