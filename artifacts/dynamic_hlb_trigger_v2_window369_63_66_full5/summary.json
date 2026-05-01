@@ -1,0 +1,103 @@
+{
+  "config": {
+    "data_path": "data/hlb_dataset.xlsx",
+    "landmarks": [
+      6,
+      9
+    ],
+    "pred_horizons": [
+      1,
+      3
+    ],
+    "window_pairs": [
+      "3:6",
+      "3:9",
+      "6:3",
+      "6:6"
+    ],
+    "early_stop_window_pairs": [
+      "3:6",
+      "3:9",
+      "6:3",
+      "6:6"
+    ],
+    "repeats": 5,
+    "test_size": 0.2,
+    "val_ratio": 0.2,
+    "seed": 42,
+    "use_time_features": false,
+    "use_ct_aux_task": true,
+    "use_agro_features": true,
+    "use_tree_id_spatial": false,
+    "period_feature_mode": "full",
+    "model_type": "trigger_orchard_v2",
+    "rnn_type": "gru",
+    "env_aux_mode": "none",
+    "epochs": 200,
+    "patience": 20,
+    "lr": 0.001,
+    "batch_size": 32,
+    "alpha": 1.0,
+    "beta": 0.2,
+    "gamma": null,
+    "gamma_env": 0.0,
+    "gamma_ct": 0.1,
+    "ct_aux_loss": "huber",
+    "lag_spread_weight": 0.01,
+    "tree_attention_dropout": 0.1,
+    "static_attention_dim": 32,
+    "weight_decay": 0.0001,
+    "output_dir": "artifacts/dynamic_hlb_trigger_v2_window369_63_66_full5",
+    "train_landmark_subset": null
+  },
+  "windows": [
+    {
+      "landmark": 3,
+      "pred_horizon": 6,
+      "eligible_n_mean": 19.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 7.0,
+      "future_event_n_std": 0.6324555320336759,
+      "ctd_mean": 0.4227909287766757,
+      "ctd_std": 0.125342387170787,
+      "bstd_mean": 0.3255718511922425,
+      "bstd_std": 0.06631254871189739
+    },
+    {
+      "landmark": 3,
+      "pred_horizon": 9,
+      "eligible_n_mean": 19.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 9.4,
+      "future_event_n_std": 0.4898979485566356,
+      "ctd_mean": 0.6792762803520812,
+      "ctd_std": 0.19348188443953263,
+      "bstd_mean": 2.2435753739103625,
+      "bstd_std": 2.6736928875753274
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 2.0,
+      "future_event_n_std": 0.6324555320336759,
+      "ctd_mean": 0.4541538461538462,
+      "ctd_std": 0.16172560588117496,
+      "bstd_mean": 0.20292607886905603,
+      "bstd_std": 0.08957476204699698
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 6,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 4.4,
+      "future_event_n_std": 0.4898979485566356,
+      "ctd_mean": 0.7270506940993824,
+      "ctd_std": 0.22574725109068697,
+      "bstd_mean": 2.479314640729915,
+      "bstd_std": 3.7788166050042737
+    }
+  ]
+}
