@@ -1,0 +1,27 @@
+{
+  "dataset": "hlb",
+  "data_path": "data/hlb_healthtree.xlsx",
+  "repeats": 10,
+  "folds": 5,
+  "n_scores": 50,
+  "mean_test_c_index": 0.8950321796356459,
+  "std_test_c_index": 0.02311922828191286,
+  "bootstrap": 2000,
+  "alpha": 0.05,
+  "ci_mean_test_c_index": [
+    0.8888102564525507,
+    0.9009787115707198
+  ],
+  "elapsed_seconds": 50.8176543712616,
+  "hyperparams": {
+    "epochs": 500,
+    "patience": 100,
+    "lr": 0.5,
+    "wd": 0.5,
+    "tau": 0.25,
+    "grid_size": 1,
+    "spline_order": 3,
+    "depth": 2,
+    "inner_val_size": 0.2
+  }
+}

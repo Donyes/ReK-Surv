@@ -1,0 +1,71 @@
+{
+  "config": {
+    "data_path": "data/hlb_dataset.xlsx",
+    "landmarks": [
+      6,
+      9
+    ],
+    "pred_horizons": [
+      1,
+      3
+    ],
+    "window_pairs": [
+      "3:2",
+      "3:8",
+      "6:6"
+    ],
+    "repeats": 5,
+    "test_size": 0.2,
+    "val_ratio": 0.2,
+    "seed": 42,
+    "use_time_features": false,
+    "rnn_type": "gru",
+    "epochs": 200,
+    "patience": 20,
+    "lr": 0.001,
+    "batch_size": 32,
+    "alpha": 1.0,
+    "beta": 0.2,
+    "gamma": 0.1,
+    "weight_decay": 0.0001,
+    "output_dir": "artifacts/dynamic_hlb_3268_66"
+  },
+  "windows": [
+    {
+      "landmark": 3,
+      "pred_horizon": 2,
+      "eligible_n_mean": 19.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 4.6,
+      "future_event_n_std": 0.4898979485566356,
+      "ctd_mean": 0.706037263767527,
+      "ctd_std": 0.08634274502185468,
+      "bstd_mean": 0.18224164846509674,
+      "bstd_std": 0.015083229071953114
+    },
+    {
+      "landmark": 3,
+      "pred_horizon": 8,
+      "eligible_n_mean": 19.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 8.8,
+      "future_event_n_std": 0.7483314773547882,
+      "ctd_mean": 0.5417965936677029,
+      "ctd_std": 0.044245845489336674,
+      "bstd_mean": 0.2694965813665974,
+      "bstd_std": 0.00977232469677222
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 6,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 4.4,
+      "future_event_n_std": 0.4898979485566356,
+      "ctd_mean": 0.5854526640500557,
+      "ctd_std": 0.18381552807040072,
+      "bstd_mean": 1.8937041484710027,
+      "bstd_std": 1.3944329610842832
+    }
+  ]
+}

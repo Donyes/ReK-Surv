@@ -1,0 +1,88 @@
+{
+  "config": {
+    "data_path": "data/hlb_dataset.xlsx",
+    "landmarks": [
+      6,
+      9
+    ],
+    "pred_horizons": [
+      1,
+      3
+    ],
+    "window_pairs": null,
+    "repeats": 5,
+    "test_size": 0.2,
+    "val_ratio": 0.2,
+    "seed": 42,
+    "use_time_features": false,
+    "use_ct_aux_task": true,
+    "use_agro_features": true,
+    "period_feature_mode": "full",
+    "model_type": "period_ms",
+    "rnn_type": "gru",
+    "env_aux_mode": "none",
+    "epochs": 200,
+    "patience": 20,
+    "lr": 0.001,
+    "batch_size": 32,
+    "alpha": 1.0,
+    "beta": 0.2,
+    "gamma": null,
+    "gamma_env": 0.0,
+    "gamma_ct": 0.2,
+    "ct_aux_loss": "huber",
+    "lag_spread_weight": 0.01,
+    "weight_decay": 0.0001,
+    "output_dir": "artifacts\\dynamic_hlb_period_ms_lag001_ct020_full"
+  },
+  "windows": [
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 0.6,
+      "future_event_n_std": 0.48989794855663565,
+      "ctd_mean": 0.5897435897435898,
+      "ctd_std": 0.3680179511386493,
+      "bstd_mean": 0.043030500528176134,
+      "bstd_std": 0.028080452416662224
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 2.0,
+      "future_event_n_std": 0.6324555320336759,
+      "ctd_mean": 0.5527912087912088,
+      "ctd_std": 0.05849728726046804,
+      "bstd_mean": 0.13116017988775708,
+      "bstd_std": 0.02298856303111853
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "eligible_n_mean": 12.0,
+      "eligible_n_std": 0.6324555320336759,
+      "future_event_n_mean": 0.6,
+      "future_event_n_std": 0.48989794855663565,
+      "ctd_mean": 0.26515151515151514,
+      "ctd_std": 0.0749961737622096,
+      "bstd_mean": 0.05725244223604414,
+      "bstd_std": 0.03749439131175224
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "eligible_n_mean": 12.0,
+      "eligible_n_std": 0.6324555320336759,
+      "future_event_n_mean": 2.4,
+      "future_event_n_std": 0.8,
+      "ctd_mean": 0.7071663720636308,
+      "ctd_std": 0.26965375717736517,
+      "bstd_mean": 0.991780857887378,
+      "bstd_std": 0.8880123085673566
+    }
+  ]
+}

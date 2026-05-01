@@ -13,7 +13,16 @@ import torch.optim as optim
 from lifelines.utils import concordance_index
 
 from models import KAN
-from utils import negative_log_likelihood, proximal_l1, load_metabric, prepare_tensors
+from utils import (
+    negative_log_likelihood,
+    proximal_l1,
+    load_metabric,
+    load_support,
+    load_whas,
+    load_rgbsg,
+    load_hlb,
+    prepare_tensors,
+)
 
 
 def set_seed(seed: int = 42):
@@ -123,7 +132,7 @@ def train(
 def main():
     parser = argparse.ArgumentParser(description='Train ReK-Surv model')
     parser.add_argument('--dataset', type=str, default='metabric', help='Dataset name')
-    parser.add_argument('--data_path', type=str, default='data/metabric.h5', help='Path to data file')
+    parser.add_argument('--data_path', type=str, default=None, help='Path to data file')
     parser.add_argument('--epochs', type=int, default=500, help='Maximum epochs')
     parser.add_argument('--patience', type=int, default=100, help='Early stopping patience')
     parser.add_argument('--lr', type=float, default=0.5, help='Learning rate')
@@ -141,7 +150,24 @@ def main():
     
     # Load data
     print(f"Loading {args.dataset} dataset...")
-    X_train, X_test, T_train, T_test, E_train, E_test = load_metabric(args.data_path)
+    dataset = args.dataset.strip().lower()
+    loaders = {
+        'metabric': load_metabric,
+        'support': load_support,
+        'whas': load_whas,
+        'rgbsg': load_rgbsg,
+        'hlb': load_hlb,
+    }
+    if dataset not in loaders:
+        raise ValueError(f"Unknown dataset: {args.dataset}. Choose from: {', '.join(loaders.keys())}")
+
+    if args.data_path is None:
+        if dataset == 'hlb':
+            args.data_path = 'data/hlb.xlsx'
+        else:
+            args.data_path = f"data/{dataset}.h5"
+
+    X_train, X_test, T_train, T_test, E_train, E_test = loaders[dataset](args.data_path)
     
     print(f"Train: {len(X_train)} samples ({int(E_train.sum())} events)")
     print(f"Test:  {len(X_test)} samples ({int(E_test.sum())} events)")

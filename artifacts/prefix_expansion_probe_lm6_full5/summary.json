@@ -1,0 +1,91 @@
+{
+  "config": {
+    "data_path": "data/hlb_dataset.xlsx",
+    "landmarks": [
+      6,
+      9
+    ],
+    "pred_horizons": [
+      1,
+      3
+    ],
+    "window_pairs": [
+      "6:1",
+      "6:3",
+      "6:6"
+    ],
+    "early_stop_window_pairs": [
+      "6:1",
+      "6:3",
+      "6:6"
+    ],
+    "repeats": 5,
+    "test_size": 0.2,
+    "val_ratio": 0.2,
+    "seed": 42,
+    "use_time_features": false,
+    "use_ct_aux_task": true,
+    "use_agro_features": true,
+    "use_tree_id_spatial": false,
+    "period_feature_mode": "full",
+    "model_type": "period_ms_tree_query",
+    "rnn_type": "gru",
+    "env_aux_mode": "none",
+    "epochs": 200,
+    "patience": 20,
+    "lr": 0.001,
+    "batch_size": 32,
+    "alpha": 1.0,
+    "beta": 0.2,
+    "gamma": null,
+    "gamma_env": 0.0,
+    "gamma_ct": 0.1,
+    "ct_aux_loss": "huber",
+    "lag_spread_weight": 0.01,
+    "tree_attention_dropout": 0.1,
+    "static_attention_dim": 32,
+    "weight_decay": 0.0001,
+    "output_dir": "artifacts/prefix_expansion_probe_lm6_full5",
+    "train_landmark_subset": [
+      6
+    ]
+  },
+  "windows": [
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 0.6,
+      "future_event_n_std": 0.48989794855663565,
+      "ctd_mean": 0.358974358974359,
+      "ctd_std": 0.22057244274468277,
+      "bstd_mean": 0.04474719910572925,
+      "bstd_std": 0.03010416453137179
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 2.0,
+      "future_event_n_std": 0.6324555320336759,
+      "ctd_mean": 0.35015384615384615,
+      "ctd_std": 0.08416158029429541,
+      "bstd_mean": 0.1597185113374071,
+      "bstd_std": 0.026778834245974523
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 6,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 4.4,
+      "future_event_n_std": 0.4898979485566356,
+      "ctd_mean": 0.5202951309813157,
+      "ctd_std": 0.10334640966763371,
+      "bstd_mean": 3.49286901913135,
+      "bstd_std": 3.7009795947818502
+    }
+  ]
+}

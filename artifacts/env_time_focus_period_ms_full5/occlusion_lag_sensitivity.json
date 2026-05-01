@@ -1,0 +1,586 @@
+{
+  "config": {
+    "artifact_dir": "artifacts\\dynamic_hlb_period_ms_full5",
+    "analysis_unit": "period",
+    "window_specs": [
+      [
+        6,
+        1
+      ],
+      [
+        6,
+        3
+      ],
+      [
+        9,
+        1
+      ],
+      [
+        9,
+        3
+      ]
+    ],
+    "history_periods": [
+      1,
+      2,
+      3
+    ],
+    "repeats_used": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "summary_by_history_periods": [
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_periods": 1,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.004447158757830039,
+      "delta_risk_std": 0.004204287937007492
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_periods": 1,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0014578389149392025,
+      "delta_risk_std": 0.000953578224872259
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_periods": 1,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0037370292246729758,
+      "delta_risk_std": 0.0021097334711534074
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_periods": 2,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.008034096332266927,
+      "delta_risk_std": 0.007356452555691243
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_periods": 2,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.002818837680388242,
+      "delta_risk_std": 0.0015463439540817565
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_periods": 2,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.00904644005931914,
+      "delta_risk_std": 0.002546970182204566
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_periods": 3,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.00912556261755526,
+      "delta_risk_std": 0.008309652823215032
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_periods": 3,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0070675007533282045,
+      "delta_risk_std": 0.0035009516026040187
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_periods": 3,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0163792135193944,
+      "delta_risk_std": 0.005184759475707575
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_periods": 1,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.007403334672562778,
+      "delta_risk_std": 0.00724019839042251
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_periods": 1,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.0040588280564406885,
+      "delta_risk_std": 0.002693732412158031
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_periods": 1,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.011733237591882547,
+      "delta_risk_std": 0.007988064423597237
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_periods": 2,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.01761780185624957,
+      "delta_risk_std": 0.013630149160419673
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_periods": 2,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.009808312961831689,
+      "delta_risk_std": 0.006761372843155247
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_periods": 2,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.027273631538264453,
+      "delta_risk_std": 0.015384722979478018
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_periods": 3,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.021565259993076326,
+      "delta_risk_std": 0.0152953555439398
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_periods": 3,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.024361857073381545,
+      "delta_risk_std": 0.01701336169481111
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_periods": 3,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.04798862021416426,
+      "delta_risk_std": 0.023163392919388334
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_periods": 1,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0009181591136439238,
+      "delta_risk_std": 0.0007515605334027123
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_periods": 1,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.000887800523196347,
+      "delta_risk_std": 0.0004837960680984048
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_periods": 1,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0026644644618500023,
+      "delta_risk_std": 0.0025649966189247113
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_periods": 1,
+      "lag_bin": "periods_7_plus",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.00736996098421514,
+      "delta_risk_std": 0.005086527922172352
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_periods": 2,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0018683862639591099,
+      "delta_risk_std": 0.0013066642525840632
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_periods": 2,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0028446062075090594,
+      "delta_risk_std": 0.0034470532964754087
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_periods": 2,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.006008722039405256,
+      "delta_risk_std": 0.0039311291946803745
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_periods": 2,
+      "lag_bin": "periods_7_plus",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.016795522812753916,
+      "delta_risk_std": 0.010606084771308175
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_periods": 3,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.002584494207985699,
+      "delta_risk_std": 0.0008800571060018014
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_periods": 3,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.006165032956050709,
+      "delta_risk_std": 0.004849638760186236
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_periods": 3,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.013050587785740694,
+      "delta_risk_std": 0.010128405798994818
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_periods": 3,
+      "lag_bin": "periods_7_plus",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.029527553264051674,
+      "delta_risk_std": 0.01977625557402606
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_periods": 1,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0016274594352580607,
+      "delta_risk_std": 0.0014968916265132469
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_periods": 1,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0024776945065241307,
+      "delta_risk_std": 0.0023754044411700747
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_periods": 1,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.006463386166918402,
+      "delta_risk_std": 0.0062310443641492895
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_periods": 1,
+      "lag_bin": "periods_7_plus",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.017007028175673136,
+      "delta_risk_std": 0.01081066972027573
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_periods": 2,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.004203052812954411,
+      "delta_risk_std": 0.003560969267904546
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_periods": 2,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.008621018505073153,
+      "delta_risk_std": 0.009249475626679663
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_periods": 2,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.014351065526716411,
+      "delta_risk_std": 0.009853970351684336
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_periods": 2,
+      "lag_bin": "periods_7_plus",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.039226481784135105,
+      "delta_risk_std": 0.022932156595004465
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_periods": 3,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.008002033014781773,
+      "delta_risk_std": 0.005525795427403666
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_periods": 3,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.017140870715957136,
+      "delta_risk_std": 0.012561718268365956
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_periods": 3,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.029907423614834745,
+      "delta_risk_std": 0.022345221793772487
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_periods": 3,
+      "lag_bin": "periods_7_plus",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.07154842354357242,
+      "delta_risk_std": 0.046143431669986745
+    }
+  ],
+  "summary_aggregate": [
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0072022725692174085,
+      "delta_risk_std": 0.0066723479627147295
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.003781392449551883,
+      "delta_risk_std": 0.003276107780906919
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0076138635520086005,
+      "delta_risk_std": 0.005440433909248829
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.015528798840629557,
+      "delta_risk_std": 0.01315492081826637
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.01274299936388464,
+      "delta_risk_std": 0.013483185184937255
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.022955932677723466,
+      "delta_risk_std": 0.01891773712289869
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0017903465285295775,
+      "delta_risk_std": 0.0011702935826894488
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0032991465622520385,
+      "delta_risk_std": 0.003995955262254093
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.007241258095665317,
+      "delta_risk_std": 0.007669099280673275
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "lag_bin": "periods_7_plus",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.014204746973700822,
+      "delta_risk_std": 0.012973180324617513
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.004610848420998082,
+      "delta_risk_std": 0.004509178000260435
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.009413194575851472,
+      "delta_risk_std": 0.010708336794106365
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.01690729176948985,
+      "delta_risk_std": 0.017295881951124848
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "lag_bin": "periods_7_plus",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.033503745273143676,
+      "delta_risk_std": 0.030247608909419018
+    }
+  ]
+}

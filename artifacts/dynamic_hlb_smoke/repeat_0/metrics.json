@@ -1,0 +1,113 @@
+{
+  "repeat": 0,
+  "seed": 42,
+  "train_trees": 78,
+  "val_trees": 20,
+  "test_trees": 25,
+  "train_prefix_samples": 606,
+  "best_epoch": 2,
+  "best_val_mean_ctd": 0.31666666666666665,
+  "static_feature_dim": 12,
+  "static_feature_names": [
+    "树龄",
+    "树势",
+    "东西冠幅",
+    "南北冠幅",
+    "树干高",
+    "树高",
+    "品种_1",
+    "品种_2",
+    "品种_3",
+    "品种_4",
+    "品种_5",
+    "周围是否有病树"
+  ],
+  "history": [
+    {
+      "epoch": 1,
+      "train_total_loss": 1.955348557764941,
+      "train_ll_loss": 1.6780568184238849,
+      "train_rank_loss": 0.9967751337750124,
+      "train_aux_loss": 0.7793670831733804,
+      "val_mean_ctd": 0.2916666666666667,
+      "lr": 0.001
+    },
+    {
+      "epoch": 2,
+      "train_total_loss": 1.6316160825219486,
+      "train_ll_loss": 1.4027771957636666,
+      "train_rank_loss": 0.8778363411182618,
+      "train_aux_loss": 0.5327163283580995,
+      "val_mean_ctd": 0.31666666666666665,
+      "lr": 0.001
+    }
+  ],
+  "validation_windows": [
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "eligible_n": 11,
+      "future_event_n": 0,
+      "ctd": NaN,
+      "bstd": 0.009920128765024384
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "eligible_n": 11,
+      "future_event_n": 1,
+      "ctd": 0.7,
+      "bstd": 0.10095457105151606
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "eligible_n": 10,
+      "future_event_n": 2,
+      "ctd": 0.125,
+      "bstd": 0.18636495524573068
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "eligible_n": 10,
+      "future_event_n": 2,
+      "ctd": 0.125,
+      "bstd": 0.18426055974742334
+    }
+  ],
+  "test_windows": [
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "eligible_n": 14,
+      "future_event_n": 1,
+      "ctd": 0.6923076923076923,
+      "bstd": 0.06751240294281351
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "eligible_n": 14,
+      "future_event_n": 3,
+      "ctd": 0.45714285714285713,
+      "bstd": 0.17212179691186416
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "eligible_n": 11,
+      "future_event_n": 0,
+      "ctd": NaN,
+      "bstd": 0.006067129737776258
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "eligible_n": 11,
+      "future_event_n": 2,
+      "ctd": 0.1111111111111111,
+      "bstd": 0.17467822145916087
+    }
+  ]
+}

@@ -1,0 +1,169 @@
+{
+  "config": {
+    "data_path": "data/hlb_dataset.xlsx",
+    "landmarks": [
+      6,
+      9
+    ],
+    "pred_horizons": [
+      1,
+      3
+    ],
+    "window_pairs": [
+      "3:3",
+      "4:3",
+      "6:3",
+      "6:6",
+      "9:3",
+      "6:1",
+      "9:1",
+      "3:2",
+      "3:8"
+    ],
+    "early_stop_window_pairs": [
+      "3:3",
+      "4:3",
+      "6:3",
+      "6:6",
+      "9:3"
+    ],
+    "repeats": 5,
+    "test_size": 0.2,
+    "val_ratio": 0.2,
+    "seed": 42,
+    "use_time_features": false,
+    "use_ct_aux_task": true,
+    "use_agro_features": true,
+    "use_tree_id_spatial": false,
+    "period_feature_mode": "full",
+    "model_type": "period_ms_tree_query",
+    "rnn_type": "gru",
+    "env_aux_mode": "none",
+    "epochs": 200,
+    "patience": 40,
+    "lr": 0.0001,
+    "batch_size": 128,
+    "alpha": 1.0,
+    "beta": 0.2,
+    "gamma": null,
+    "gamma_env": 0.0,
+    "gamma_ct": 0.1,
+    "ct_aux_loss": "huber",
+    "lag_spread_weight": 0.01,
+    "tree_attention_dropout": 0.1,
+    "static_attention_dim": 32,
+    "weight_decay": 0.0001,
+    "output_dir": "artifacts/dynamic_hlb_tree_query_full5",
+    "train_landmark_subset": null
+  },
+  "windows": [
+    {
+      "landmark": 3,
+      "pred_horizon": 2,
+      "eligible_n_mean": 19.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 4.6,
+      "future_event_n_std": 0.4898979485566356,
+      "ctd_mean": 0.49502634683555735,
+      "ctd_std": 0.19208536083082373,
+      "bstd_mean": 0.18563315609738854,
+      "bstd_std": 0.015376478424976834
+    },
+    {
+      "landmark": 3,
+      "pred_horizon": 3,
+      "eligible_n_mean": 19.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 5.0,
+      "future_event_n_std": 0.0,
+      "ctd_mean": 0.5213714687398898,
+      "ctd_std": 0.10492029030039385,
+      "bstd_mean": 0.1941553579322675,
+      "bstd_std": 0.0003997248199760276
+    },
+    {
+      "landmark": 3,
+      "pred_horizon": 8,
+      "eligible_n_mean": 19.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 8.8,
+      "future_event_n_std": 0.7483314773547882,
+      "ctd_mean": 0.5596491131964594,
+      "ctd_std": 0.1219709308561724,
+      "bstd_mean": 0.31157939941991203,
+      "bstd_std": 0.032412091568265196
+    },
+    {
+      "landmark": 4,
+      "pred_horizon": 3,
+      "eligible_n_mean": 15.8,
+      "eligible_n_std": 0.7483314773547882,
+      "future_event_n_mean": 2.4,
+      "future_event_n_std": 1.019803902718557,
+      "ctd_mean": 0.6585085974444567,
+      "ctd_std": 0.19755536259940215,
+      "bstd_mean": 0.14647552415585516,
+      "bstd_std": 0.026475684101954687
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 0.6,
+      "future_event_n_std": 0.48989794855663565,
+      "ctd_mean": 0.5128205128205129,
+      "ctd_std": 0.32230269461478295,
+      "bstd_mean": 0.04610391405849194,
+      "bstd_std": 0.027937458630841894
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 2.0,
+      "future_event_n_std": 0.6324555320336759,
+      "ctd_mean": 0.3495384615384616,
+      "ctd_std": 0.17099057034798437,
+      "bstd_mean": 0.1708074379241719,
+      "bstd_std": 0.012967015965196846
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 6,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 4.4,
+      "future_event_n_std": 0.4898979485566356,
+      "ctd_mean": 0.46720470639570183,
+      "ctd_std": 0.2795032839473155,
+      "bstd_mean": 3.9279470455301095,
+      "bstd_std": 3.6268647432270877
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "eligible_n_mean": 12.0,
+      "eligible_n_std": 0.6324555320336759,
+      "future_event_n_mean": 0.6,
+      "future_event_n_std": 0.48989794855663565,
+      "ctd_mean": 0.8257575757575758,
+      "ctd_std": 0.06516913081092898,
+      "bstd_mean": 0.059836600318976974,
+      "bstd_std": 0.034751187979961136
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "eligible_n_mean": 12.0,
+      "eligible_n_std": 0.6324555320336759,
+      "future_event_n_mean": 2.4,
+      "future_event_n_std": 0.8,
+      "ctd_mean": 0.5785852891076791,
+      "ctd_std": 0.19741809206720182,
+      "bstd_mean": 2.9043739041383283,
+      "bstd_std": 2.6845082502754605
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "config": {
+    "data_path": "data/hlb_dataset.xlsx",
+    "landmarks": [
+      6,
+      9
+    ],
+    "pred_horizons": [
+      1,
+      3
+    ],
+    "window_pairs": null,
+    "repeats": 5,
+    "test_size": 0.2,
+    "val_ratio": 0.2,
+    "seed": 42,
+    "use_time_features": true,
+    "rnn_type": "gru",
+    "epochs": 200,
+    "patience": 20,
+    "lr": 0.001,
+    "batch_size": 32,
+    "alpha": 1.0,
+    "beta": 0.2,
+    "gamma": 0.1,
+    "weight_decay": 0.0001,
+    "output_dir": "artifacts/dynamic_hlb_full5_timefeat"
+  },
+  "windows": [
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 0.6,
+      "future_event_n_std": 0.48989794855663565,
+      "ctd_mean": 0.5641025641025642,
+      "ctd_std": 0.145047544858779,
+      "bstd_mean": 0.07748747396931752,
+      "bstd_std": 0.07766527538281395
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 2.0,
+      "future_event_n_std": 0.6324555320336759,
+      "ctd_mean": 0.4756043956043955,
+      "ctd_std": 0.16070151729122825,
+      "bstd_mean": 0.18876674549027686,
+      "bstd_std": 0.08865594522989208
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "eligible_n_mean": 12.0,
+      "eligible_n_std": 0.6324555320336759,
+      "future_event_n_mean": 0.6,
+      "future_event_n_std": 0.48989794855663565,
+      "ctd_mean": 0.35858585858585856,
+      "ctd_std": 0.20113442173474624,
+      "bstd_mean": 0.08164424543023266,
+      "bstd_std": 0.067089130884334
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "eligible_n_mean": 12.0,
+      "eligible_n_std": 0.6324555320336759,
+      "future_event_n_mean": 2.4,
+      "future_event_n_std": 0.8,
+      "ctd_mean": 0.6810711795719412,
+      "ctd_std": 0.17134190651994055,
+      "bstd_mean": 1.2980500901439327,
+      "bstd_std": 1.3777017556503903
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "repeat": 0,
+  "seed": 42,
+  "train_trees": 78,
+  "val_trees": 20,
+  "test_trees": 25,
+  "train_prefix_samples": 606,
+  "best_epoch": 1,
+  "best_val_mean_ctd": 0.5250465381612923,
+  "static_feature_dim": 12,
+  "static_feature_names": [
+    "树龄",
+    "树势",
+    "东西冠幅",
+    "南北冠幅",
+    "树干高",
+    "树高",
+    "品种_1",
+    "品种_2",
+    "品种_3",
+    "品种_4",
+    "品种_5",
+    "周围是否有病树"
+  ],
+  "history": [
+    {
+      "epoch": 1,
+      "train_total_loss": 1.9409983079425572,
+      "train_ll_loss": 1.6634403896017043,
+      "train_rank_loss": 0.991496470304999,
+      "train_aux_loss": 0.7925862730926413,
+      "val_mean_ctd": 0.5250465381612923,
+      "lr": 0.001
+    }
+  ],
+  "validation_windows": [
+    {
+      "landmark": 3,
+      "pred_horizon": 2,
+      "eligible_n": 14,
+      "future_event_n": 3,
+      "ctd": 0.7428571428571429,
+      "bstd": 0.1723156191512309
+    },
+    {
+      "landmark": 3,
+      "pred_horizon": 8,
+      "eligible_n": 14,
+      "future_event_n": 6,
+      "ctd": 0.5245901639344263,
+      "bstd": 0.24549458213505687
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 6,
+      "eligible_n": 11,
+      "future_event_n": 3,
+      "ctd": 0.3076923076923077,
+      "bstd": 0.20887272876489407
+    }
+  ],
+  "test_windows": [
+    {
+      "landmark": 3,
+      "pred_horizon": 2,
+      "eligible_n": 19,
+      "future_event_n": 5,
+      "ctd": 0.8243243243243243,
+      "bstd": 0.20704139216142706
+    },
+    {
+      "landmark": 3,
+      "pred_horizon": 8,
+      "eligible_n": 19,
+      "future_event_n": 10,
+      "ctd": 0.6535433070866141,
+      "bstd": 0.2603004781238204
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 6,
+      "eligible_n": 14,
+      "future_event_n": 5,
+      "ctd": 0.41509433962264153,
+      "bstd": 0.24485885799693966
+    }
+  ]
+}

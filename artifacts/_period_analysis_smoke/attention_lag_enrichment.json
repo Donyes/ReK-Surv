@@ -1,0 +1,231 @@
+{
+  "config": {
+    "artifact_dir": "artifacts\\dynamic_hlb_period_ms_full5",
+    "analysis_unit": "period",
+    "window_specs": [
+      [
+        6,
+        1
+      ],
+      [
+        6,
+        3
+      ],
+      [
+        9,
+        1
+      ],
+      [
+        9,
+        3
+      ]
+    ],
+    "repeats_used": [
+      0
+    ]
+  },
+  "summary": [
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 1.0,
+      "actual_mass_mean": 0.09231473505496979,
+      "actual_mass_std": 0.0,
+      "uniform_mass": 0.16666666666666666,
+      "enrichment_mean": 0.5538884103298187,
+      "enrichment_std": 0.0
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 1.0,
+      "actual_mass_mean": 0.3508819043636322,
+      "actual_mass_std": 0.0,
+      "uniform_mass": 0.3333333333333333,
+      "enrichment_mean": 1.0526457130908966,
+      "enrichment_std": 0.0
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 1.0,
+      "actual_mass_mean": 0.556803286075592,
+      "actual_mass_std": 0.0,
+      "uniform_mass": 0.5,
+      "enrichment_mean": 1.113606572151184,
+      "enrichment_std": 0.0
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 3.0,
+      "actual_mass_mean": 0.09231473505496979,
+      "actual_mass_std": 0.0,
+      "uniform_mass": 0.16666666666666666,
+      "enrichment_mean": 0.5538884103298187,
+      "enrichment_std": 0.0
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 3.0,
+      "actual_mass_mean": 0.3508819043636322,
+      "actual_mass_std": 0.0,
+      "uniform_mass": 0.3333333333333333,
+      "enrichment_mean": 1.0526457130908966,
+      "enrichment_std": 0.0
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 3.0,
+      "actual_mass_mean": 0.556803286075592,
+      "actual_mass_std": 0.0,
+      "uniform_mass": 0.5,
+      "enrichment_mean": 1.113606572151184,
+      "enrichment_std": 0.0
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 11.0,
+      "future_event_n_mean": 0.0,
+      "actual_mass_mean": 0.06337804347276688,
+      "actual_mass_std": 0.0,
+      "uniform_mass": 0.1111111111111111,
+      "enrichment_mean": 0.5704023912549019,
+      "enrichment_std": 0.0
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 11.0,
+      "future_event_n_mean": 0.0,
+      "actual_mass_mean": 0.20618954300880432,
+      "actual_mass_std": 0.0,
+      "uniform_mass": 0.2222222222222222,
+      "enrichment_mean": 0.9278529435396194,
+      "enrichment_std": 0.0
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 11.0,
+      "future_event_n_mean": 0.0,
+      "actual_mass_mean": 0.3211979568004608,
+      "actual_mass_std": 0.0,
+      "uniform_mass": 0.3333333333333333,
+      "enrichment_mean": 0.9635938704013824,
+      "enrichment_std": 0.0
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "lag_bin": "periods_7_plus",
+      "eligible_n_mean": 11.0,
+      "future_event_n_mean": 0.0,
+      "actual_mass_mean": 0.40923449397087097,
+      "actual_mass_std": 0.0,
+      "uniform_mass": 0.3333333333333333,
+      "enrichment_mean": 1.227703481912613,
+      "enrichment_std": 0.0
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "lag_bin": "last_1_period",
+      "eligible_n_mean": 11.0,
+      "future_event_n_mean": 2.0,
+      "actual_mass_mean": 0.06337804347276688,
+      "actual_mass_std": 0.0,
+      "uniform_mass": 0.1111111111111111,
+      "enrichment_mean": 0.5704023912549019,
+      "enrichment_std": 0.0
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "lag_bin": "periods_2_3",
+      "eligible_n_mean": 11.0,
+      "future_event_n_mean": 2.0,
+      "actual_mass_mean": 0.20618954300880432,
+      "actual_mass_std": 0.0,
+      "uniform_mass": 0.2222222222222222,
+      "enrichment_mean": 0.9278529435396194,
+      "enrichment_std": 0.0
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "lag_bin": "periods_4_6",
+      "eligible_n_mean": 11.0,
+      "future_event_n_mean": 2.0,
+      "actual_mass_mean": 0.3211979568004608,
+      "actual_mass_std": 0.0,
+      "uniform_mass": 0.3333333333333333,
+      "enrichment_mean": 0.9635938704013824,
+      "enrichment_std": 0.0
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "lag_bin": "periods_7_plus",
+      "eligible_n_mean": 11.0,
+      "future_event_n_mean": 2.0,
+      "actual_mass_mean": 0.40923449397087097,
+      "actual_mass_std": 0.0,
+      "uniform_mass": 0.3333333333333333,
+      "enrichment_mean": 1.227703481912613,
+      "enrichment_std": 0.0
+    }
+  ],
+  "overall": [
+    {
+      "lag_bin": "last_1_period",
+      "actual_mass_mean": 0.07784638926386833,
+      "actual_mass_std": 0.016706606674442032,
+      "uniform_mass": 0.1388888888888889,
+      "enrichment_mean": 0.5621454007923603,
+      "enrichment_std": 0.009534351332489107
+    },
+    {
+      "lag_bin": "periods_2_3",
+      "actual_mass_mean": 0.27853572368621826,
+      "actual_mass_std": 0.0835381737778925,
+      "uniform_mass": 0.2777777777777778,
+      "enrichment_mean": 0.990249328315258,
+      "enrichment_std": 0.0720491390933488
+    },
+    {
+      "lag_bin": "periods_4_6",
+      "actual_mass_mean": 0.43900062143802643,
+      "actual_mass_std": 0.13602680027950742,
+      "uniform_mass": 0.41666666666666663,
+      "enrichment_mean": 1.0386002212762833,
+      "enrichment_std": 0.08660987373711106
+    },
+    {
+      "lag_bin": "periods_7_plus",
+      "actual_mass_mean": 0.40923449397087097,
+      "actual_mass_std": 0.0,
+      "uniform_mass": 0.3333333333333333,
+      "enrichment_mean": 1.227703481912613,
+      "enrichment_std": 0.0
+    }
+  ]
+}

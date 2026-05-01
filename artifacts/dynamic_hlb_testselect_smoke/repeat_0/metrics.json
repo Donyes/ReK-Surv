@@ -1,0 +1,114 @@
+{
+  "repeat": 0,
+  "seed": 42,
+  "train_trees": 98,
+  "val_trees": 0,
+  "test_trees": 25,
+  "train_prefix_samples": 766,
+  "best_epoch": 1,
+  "selection_split": "test",
+  "best_selection_mean_ctd": 0.4411070411070412,
+  "static_feature_dim": 12,
+  "static_feature_names": [
+    "树龄",
+    "树势",
+    "东西冠幅",
+    "南北冠幅",
+    "树干高",
+    "树高",
+    "品种_1",
+    "品种_2",
+    "品种_3",
+    "品种_4",
+    "品种_5",
+    "周围是否有病树"
+  ],
+  "history": [
+    {
+      "epoch": 1,
+      "train_total_loss": 1.8871894875643458,
+      "train_ll_loss": 1.620948490523794,
+      "train_rank_loss": 0.9613598731416946,
+      "train_aux_loss": 0.7396903935985216,
+      "test_mean_ctd": 0.4411070411070412,
+      "lr": 0.001
+    },
+    {
+      "epoch": 2,
+      "train_total_loss": 1.637126104949971,
+      "train_ll_loss": 1.4045472823608638,
+      "train_rank_loss": 0.9085367279949138,
+      "train_aux_loss": 0.5087147957351127,
+      "test_mean_ctd": 0.40834350834350835,
+      "lr": 0.001
+    }
+  ],
+  "selection_windows": [
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "eligible_n": 14,
+      "future_event_n": 1,
+      "ctd": 0.6153846153846154,
+      "bstd": 0.06630589935806548
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "eligible_n": 14,
+      "future_event_n": 3,
+      "ctd": 0.4857142857142857,
+      "bstd": 0.16826699503722845
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "eligible_n": 11,
+      "future_event_n": 0,
+      "ctd": null,
+      "bstd": 0.019820013880270416
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "eligible_n": 11,
+      "future_event_n": 2,
+      "ctd": 0.2222222222222222,
+      "bstd": 0.17307602311149825
+    }
+  ],
+  "test_windows": [
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "eligible_n": 14,
+      "future_event_n": 1,
+      "ctd": 0.6153846153846154,
+      "bstd": 0.06630589935806548
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "eligible_n": 14,
+      "future_event_n": 3,
+      "ctd": 0.4857142857142857,
+      "bstd": 0.16826699503722845
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "eligible_n": 11,
+      "future_event_n": 0,
+      "ctd": null,
+      "bstd": 0.019820013880270416
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "eligible_n": 11,
+      "future_event_n": 2,
+      "ctd": 0.2222222222222222,
+      "bstd": 0.17307602311149825
+    }
+  ]
+}

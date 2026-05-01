@@ -1,0 +1,93 @@
+# Tree-specific period attention diagnostics
+
+## Trained attention diversity
+- dynamic_hlb_period_ms_compare_windows_full5 3->2: Ctd=0.6029, BStd=0.1825, eligible=19.0, events=4.6, JS=0.000000, unique_rows=1.0
+- dynamic_hlb_period_ms_compare_windows_full5 3->3: Ctd=0.5675, BStd=0.1980, eligible=19.0, events=5.0, JS=0.000000, unique_rows=1.0
+- dynamic_hlb_period_ms_compare_windows_full5 3->8: Ctd=0.5907, BStd=0.2704, eligible=19.0, events=8.8, JS=0.000000, unique_rows=1.0
+- dynamic_hlb_period_ms_compare_windows_full5 4->3: Ctd=0.5822, BStd=0.1506, eligible=15.8, events=2.4, JS=0.000000, unique_rows=1.0
+- dynamic_hlb_period_ms_compare_windows_full5 6->1: Ctd=0.5897, BStd=0.0431, eligible=14.0, events=0.6, JS=0.000000, unique_rows=1.0
+- dynamic_hlb_period_ms_compare_windows_full5 6->3: Ctd=0.5705, BStd=0.1365, eligible=14.0, events=2.0, JS=0.000000, unique_rows=1.0
+- dynamic_hlb_period_ms_compare_windows_full5 6->6: Ctd=0.8070, BStd=1.8044, eligible=14.0, events=4.4, JS=0.000000, unique_rows=1.0
+- dynamic_hlb_period_ms_compare_windows_full5 9->1: Ctd=0.2955, BStd=0.0608, eligible=12.0, events=0.6, JS=0.000000, unique_rows=1.0
+- dynamic_hlb_period_ms_compare_windows_full5 9->3: Ctd=0.7157, BStd=1.0873, eligible=12.0, events=2.4, JS=0.000000, unique_rows=1.0
+- dynamic_hlb_tree_query_full5 3->2: Ctd=0.5530, BStd=0.1840, eligible=19.0, events=4.6, JS=0.000160, unique_rows=19.0
+- dynamic_hlb_tree_query_full5 3->3: Ctd=0.5995, BStd=0.1941, eligible=19.0, events=5.0, JS=0.000160, unique_rows=19.0
+- dynamic_hlb_tree_query_full5 3->8: Ctd=0.5831, BStd=0.2521, eligible=19.0, events=8.8, JS=0.000160, unique_rows=19.0
+- dynamic_hlb_tree_query_full5 4->3: Ctd=0.6411, BStd=0.1391, eligible=15.8, events=2.4, JS=0.000153, unique_rows=15.8
+- dynamic_hlb_tree_query_full5 6->1: Ctd=0.3590, BStd=0.0425, eligible=14.0, events=0.6, JS=0.000500, unique_rows=14.0
+- dynamic_hlb_tree_query_full5 6->3: Ctd=0.5869, BStd=0.1276, eligible=14.0, events=2.0, JS=0.000500, unique_rows=14.0
+- dynamic_hlb_tree_query_full5 6->6: Ctd=0.7290, BStd=1.4223, eligible=14.0, events=4.4, JS=0.000500, unique_rows=14.0
+- dynamic_hlb_tree_query_full5 9->1: Ctd=0.5455, BStd=0.0551, eligible=12.0, events=0.6, JS=0.000506, unique_rows=12.0
+- dynamic_hlb_tree_query_full5 9->3: Ctd=0.6944, BStd=0.9960, eligible=12.0, events=2.4, JS=0.000506, unique_rows=12.0
+- dynamic_hlb_tree_query_spatial_full5 3->2: Ctd=0.6987, BStd=0.1836, eligible=19.0, events=4.6, JS=0.000337, unique_rows=19.0
+- dynamic_hlb_tree_query_spatial_full5 3->3: Ctd=0.6552, BStd=0.1937, eligible=19.0, events=5.0, JS=0.000337, unique_rows=19.0
+- dynamic_hlb_tree_query_spatial_full5 3->8: Ctd=0.5857, BStd=0.2591, eligible=19.0, events=8.8, JS=0.000337, unique_rows=19.0
+- dynamic_hlb_tree_query_spatial_full5 4->3: Ctd=0.5351, BStd=0.1525, eligible=15.8, events=2.4, JS=0.000700, unique_rows=15.8
+- dynamic_hlb_tree_query_spatial_full5 6->1: Ctd=0.5897, BStd=0.0441, eligible=14.0, events=0.6, JS=0.002807, unique_rows=14.0
+- dynamic_hlb_tree_query_spatial_full5 6->3: Ctd=0.5424, BStd=0.1347, eligible=14.0, events=2.0, JS=0.002807, unique_rows=14.0
+- dynamic_hlb_tree_query_spatial_full5 6->6: Ctd=0.7775, BStd=1.3904, eligible=14.0, events=4.4, JS=0.002807, unique_rows=14.0
+- dynamic_hlb_tree_query_spatial_full5 9->1: Ctd=0.4773, BStd=0.0481, eligible=12.0, events=0.6, JS=0.005141, unique_rows=12.0
+- dynamic_hlb_tree_query_spatial_full5 9->3: Ctd=0.7353, BStd=0.9168, eligible=12.0, events=2.4, JS=0.005141, unique_rows=12.0
+
+## Random-init control
+- dynamic_hlb_period_ms_compare_windows_full5 3->2: random JS=0.000000
+- dynamic_hlb_period_ms_compare_windows_full5 3->3: random JS=0.000000
+- dynamic_hlb_period_ms_compare_windows_full5 3->8: random JS=0.000000
+- dynamic_hlb_period_ms_compare_windows_full5 4->3: random JS=0.000000
+- dynamic_hlb_period_ms_compare_windows_full5 6->1: random JS=0.000000
+- dynamic_hlb_period_ms_compare_windows_full5 6->3: random JS=0.000000
+- dynamic_hlb_period_ms_compare_windows_full5 6->6: random JS=0.000000
+- dynamic_hlb_period_ms_compare_windows_full5 9->1: random JS=0.000000
+- dynamic_hlb_period_ms_compare_windows_full5 9->3: random JS=0.000000
+- dynamic_hlb_tree_query_full5 3->2: random JS=0.000022
+- dynamic_hlb_tree_query_full5 3->3: random JS=0.000022
+- dynamic_hlb_tree_query_full5 3->8: random JS=0.000022
+- dynamic_hlb_tree_query_full5 4->3: random JS=0.000022
+- dynamic_hlb_tree_query_full5 6->1: random JS=0.000028
+- dynamic_hlb_tree_query_full5 6->3: random JS=0.000028
+- dynamic_hlb_tree_query_full5 6->6: random JS=0.000028
+- dynamic_hlb_tree_query_full5 9->1: random JS=0.000031
+- dynamic_hlb_tree_query_full5 9->3: random JS=0.000031
+- dynamic_hlb_tree_query_spatial_full5 3->2: random JS=0.000028
+- dynamic_hlb_tree_query_spatial_full5 3->3: random JS=0.000028
+- dynamic_hlb_tree_query_spatial_full5 3->8: random JS=0.000028
+- dynamic_hlb_tree_query_spatial_full5 4->3: random JS=0.000027
+- dynamic_hlb_tree_query_spatial_full5 6->1: random JS=0.000033
+- dynamic_hlb_tree_query_spatial_full5 6->3: random JS=0.000033
+- dynamic_hlb_tree_query_spatial_full5 6->6: random JS=0.000033
+- dynamic_hlb_tree_query_spatial_full5 9->1: random JS=0.000036
+- dynamic_hlb_tree_query_spatial_full5 9->3: random JS=0.000036
+
+## Static-shuffle control
+- dynamic_hlb_period_ms_compare_windows_full5 3->2: shuffled Ctd=0.5022, BStd=0.1869, |delta risk|=0.0276
+- dynamic_hlb_period_ms_compare_windows_full5 3->3: shuffled Ctd=0.5202, BStd=0.1987, |delta risk|=0.0314
+- dynamic_hlb_period_ms_compare_windows_full5 3->8: shuffled Ctd=0.5010, BStd=0.2773, |delta risk|=0.0678
+- dynamic_hlb_period_ms_compare_windows_full5 4->3: shuffled Ctd=0.5279, BStd=0.1495, |delta risk|=0.0334
+- dynamic_hlb_period_ms_compare_windows_full5 6->1: shuffled Ctd=0.5385, BStd=0.0435, |delta risk|=0.0183
+- dynamic_hlb_period_ms_compare_windows_full5 6->3: shuffled Ctd=0.4576, BStd=0.1390, |delta risk|=0.0466
+- dynamic_hlb_period_ms_compare_windows_full5 6->6: shuffled Ctd=0.4761, BStd=1.9505, |delta risk|=0.0805
+- dynamic_hlb_period_ms_compare_windows_full5 9->1: shuffled Ctd=0.4730, BStd=0.0606, |delta risk|=0.0403
+- dynamic_hlb_period_ms_compare_windows_full5 9->3: shuffled Ctd=0.5195, BStd=1.2324, |delta risk|=0.0728
+- dynamic_hlb_tree_query_full5 3->2: shuffled Ctd=0.4995, BStd=0.1866, |delta risk|=0.0190
+- dynamic_hlb_tree_query_full5 3->3: shuffled Ctd=0.5305, BStd=0.1967, |delta risk|=0.0223
+- dynamic_hlb_tree_query_full5 3->8: shuffled Ctd=0.5112, BStd=0.2598, |delta risk|=0.0516
+- dynamic_hlb_tree_query_full5 4->3: shuffled Ctd=0.4639, BStd=0.1395, |delta risk|=0.0227
+- dynamic_hlb_tree_query_full5 6->1: shuffled Ctd=0.5231, BStd=0.0416, |delta risk|=0.0133
+- dynamic_hlb_tree_query_full5 6->3: shuffled Ctd=0.5104, BStd=0.1307, |delta risk|=0.0367
+- dynamic_hlb_tree_query_full5 6->6: shuffled Ctd=0.4976, BStd=1.5216, |delta risk|=0.0586
+- dynamic_hlb_tree_query_full5 9->1: shuffled Ctd=0.4106, BStd=0.0569, |delta risk|=0.0360
+- dynamic_hlb_tree_query_full5 9->3: shuffled Ctd=0.4725, BStd=1.0640, |delta risk|=0.0472
+- dynamic_hlb_tree_query_spatial_full5 3->2: shuffled Ctd=0.4685, BStd=0.1896, |delta risk|=0.0230
+- dynamic_hlb_tree_query_spatial_full5 3->3: shuffled Ctd=0.5363, BStd=0.1989, |delta risk|=0.0249
+- dynamic_hlb_tree_query_spatial_full5 3->8: shuffled Ctd=0.4896, BStd=0.2652, |delta risk|=0.0435
+- dynamic_hlb_tree_query_spatial_full5 4->3: shuffled Ctd=0.5095, BStd=0.1516, |delta risk|=0.0227
+- dynamic_hlb_tree_query_spatial_full5 6->1: shuffled Ctd=0.5154, BStd=0.0427, |delta risk|=0.0128
+- dynamic_hlb_tree_query_spatial_full5 6->3: shuffled Ctd=0.4848, BStd=0.1318, |delta risk|=0.0380
+- dynamic_hlb_tree_query_spatial_full5 6->6: shuffled Ctd=0.5096, BStd=1.4670, |delta risk|=0.0554
+- dynamic_hlb_tree_query_spatial_full5 9->1: shuffled Ctd=0.4308, BStd=0.0479, |delta risk|=0.0206
+- dynamic_hlb_tree_query_spatial_full5 9->3: shuffled Ctd=0.4806, BStd=0.9674, |delta risk|=0.0354
+
+## Outputs
+- all_sample_attention.csv: every eligible test tree with risk and attn_P1...attn_P13.
+- static_group_attention.csv: attention summaries grouped by Sheet2 static attributes.
+- period_occlusion_summary.csv: periods whose masking changes risk the most.

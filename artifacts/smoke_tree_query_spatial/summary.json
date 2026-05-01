@@ -1,0 +1,168 @@
+{
+  "config": {
+    "data_path": "data/hlb_dataset.xlsx",
+    "landmarks": [
+      6,
+      9
+    ],
+    "pred_horizons": [
+      1,
+      3
+    ],
+    "window_pairs": [
+      "3:3",
+      "4:3",
+      "6:3",
+      "6:6",
+      "9:3",
+      "6:1",
+      "9:1",
+      "3:2",
+      "3:8"
+    ],
+    "early_stop_window_pairs": [
+      "3:3",
+      "4:3",
+      "6:3",
+      "6:6",
+      "9:3"
+    ],
+    "repeats": 1,
+    "test_size": 0.2,
+    "val_ratio": 0.2,
+    "seed": 42,
+    "use_time_features": false,
+    "use_ct_aux_task": true,
+    "use_agro_features": true,
+    "use_tree_id_spatial": true,
+    "period_feature_mode": "full",
+    "model_type": "period_ms_tree_query",
+    "rnn_type": "gru",
+    "env_aux_mode": "none",
+    "epochs": 5,
+    "patience": 3,
+    "lr": 0.001,
+    "batch_size": 32,
+    "alpha": 1.0,
+    "beta": 0.2,
+    "gamma": null,
+    "gamma_env": 0.0,
+    "gamma_ct": 0.1,
+    "ct_aux_loss": "huber",
+    "lag_spread_weight": 0.01,
+    "tree_attention_dropout": 0.1,
+    "static_attention_dim": 32,
+    "weight_decay": 0.0001,
+    "output_dir": "artifacts\\smoke_tree_query_spatial"
+  },
+  "windows": [
+    {
+      "landmark": 3,
+      "pred_horizon": 2,
+      "eligible_n_mean": 19.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 5.0,
+      "future_event_n_std": 0.0,
+      "ctd_mean": 0.6216216216216216,
+      "ctd_std": 0.0,
+      "bstd_mean": 0.21029341961635814,
+      "bstd_std": 0.0
+    },
+    {
+      "landmark": 3,
+      "pred_horizon": 3,
+      "eligible_n_mean": 19.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 5.0,
+      "future_event_n_std": 0.0,
+      "ctd_mean": 0.6081081081081081,
+      "ctd_std": 0.0,
+      "bstd_mean": 0.1939878046729442,
+      "bstd_std": 0.0
+    },
+    {
+      "landmark": 3,
+      "pred_horizon": 8,
+      "eligible_n_mean": 19.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 10.0,
+      "future_event_n_std": 0.0,
+      "ctd_mean": 0.5748031496062992,
+      "ctd_std": 0.0,
+      "bstd_mean": 0.25013733781823716,
+      "bstd_std": 0.0
+    },
+    {
+      "landmark": 4,
+      "pred_horizon": 3,
+      "eligible_n_mean": 15.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 2.0,
+      "future_event_n_std": 0.0,
+      "ctd_mean": 0.7777777777777778,
+      "ctd_std": 0.0,
+      "bstd_mean": 0.14212819619641373,
+      "bstd_std": 0.0
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 1.0,
+      "future_event_n_std": 0.0,
+      "ctd_mean": 0.7692307692307693,
+      "ctd_std": 0.0,
+      "bstd_mean": 0.06778230003872535,
+      "bstd_std": 0.0
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 3.0,
+      "future_event_n_std": 0.0,
+      "ctd_mean": 0.7428571428571429,
+      "ctd_std": 0.0,
+      "bstd_mean": 0.1744993068467875,
+      "bstd_std": 0.0
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 6,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 5.0,
+      "future_event_n_std": 0.0,
+      "ctd_mean": 0.5660377358490566,
+      "ctd_std": 0.0,
+      "bstd_mean": 0.23283948483698547,
+      "bstd_std": 0.0
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "eligible_n_mean": 11.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 0.0,
+      "future_event_n_std": 0.0,
+      "ctd_mean": null,
+      "ctd_std": null,
+      "bstd_mean": 0.003134308730712132,
+      "bstd_std": 0.0
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "eligible_n_mean": 11.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 2.0,
+      "future_event_n_std": 0.0,
+      "ctd_mean": 0.3333333333333333,
+      "ctd_std": 0.0,
+      "bstd_mean": 0.15329052139510063,
+      "bstd_std": 0.0
+    }
+  ]
+}

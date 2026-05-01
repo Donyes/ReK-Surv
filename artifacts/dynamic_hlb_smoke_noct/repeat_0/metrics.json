@@ -1,0 +1,129 @@
+{
+  "repeat": 0,
+  "seed": 42,
+  "train_trees": 78,
+  "val_trees": 20,
+  "test_trees": 25,
+  "train_prefix_samples": 606,
+  "val_prefix_samples": 160,
+  "train_ct_aux_valid_n": 0,
+  "val_ct_aux_valid_n": 0,
+  "best_epoch": 1,
+  "best_val_mean_ctd": 0.4041666666666666,
+  "ct_aux_enabled": false,
+  "ct_aux_loss": "huber",
+  "ct_target_mean": 0.0,
+  "ct_target_std": 1.0,
+  "ct_target_count": 0,
+  "static_feature_dim": 12,
+  "static_feature_names": [
+    "树龄",
+    "树势",
+    "东西冠幅",
+    "南北冠幅",
+    "树干高",
+    "树高",
+    "variety_1",
+    "variety_2",
+    "variety_3",
+    "variety_4",
+    "variety_5",
+    "has_diseased_neighbor"
+  ],
+  "history": [
+    {
+      "epoch": 1,
+      "train_total_loss": 1.8628358203585784,
+      "train_ll_loss": 1.628866951457738,
+      "train_rank_loss": 0.9550701253878402,
+      "train_env_aux_loss": 0.8590971469485721,
+      "train_ct_aux_loss": 0.0,
+      "val_total_loss": 1.6741666436195373,
+      "val_ll_loss": 1.5297359704971314,
+      "val_rank_loss": 0.5410601139068604,
+      "val_env_aux_loss": 0.7243725717067718,
+      "val_ct_aux_loss": 0.0,
+      "val_ct_aux_mae": null,
+      "val_ct_aux_valid_n": 0,
+      "val_mean_ctd": 0.4041666666666666,
+      "lr": 0.001
+    }
+  ],
+  "validation_windows": [
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "eligible_n": 11,
+      "future_event_n": 0,
+      "ctd": null,
+      "bstd": 0.010193998358097004
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "eligible_n": 11,
+      "future_event_n": 1,
+      "ctd": 0.9,
+      "bstd": 0.10576444059952554
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "eligible_n": 10,
+      "future_event_n": 2,
+      "ctd": 0.125,
+      "bstd": 0.17348707732928254
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "eligible_n": 10,
+      "future_event_n": 2,
+      "ctd": 0.1875,
+      "bstd": 0.18158976461834817
+    }
+  ],
+  "best_validation_prefix_metrics": {
+    "total": 1.6741666436195373,
+    "ll": 1.5297359704971314,
+    "rank": 0.5410601139068604,
+    "env_aux": 0.7243725717067718,
+    "ct_aux": 0.0,
+    "ct_aux_mae": null,
+    "ct_aux_valid_n": 0
+  },
+  "test_windows": [
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "eligible_n": 14,
+      "future_event_n": 1,
+      "ctd": 1.0,
+      "bstd": 0.06613409309131245
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "eligible_n": 14,
+      "future_event_n": 3,
+      "ctd": 0.5142857142857142,
+      "bstd": 0.16961155186485843
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "eligible_n": 11,
+      "future_event_n": 0,
+      "ctd": null,
+      "bstd": 0.01492652223834463
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "eligible_n": 11,
+      "future_event_n": 2,
+      "ctd": 0.1111111111111111,
+      "bstd": 0.17550687985379296
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "config": {
+    "data_path": "data/hlb_dataset.xlsx",
+    "landmarks": [
+      6,
+      9
+    ],
+    "pred_horizons": [
+      1,
+      3
+    ],
+    "window_pairs": null,
+    "repeats": 5,
+    "test_size": 0.2,
+    "val_ratio": 0.2,
+    "seed": 42,
+    "use_time_features": false,
+    "use_ct_aux_task": true,
+    "use_agro_features": true,
+    "model_type": "legacy",
+    "rnn_type": "gru",
+    "env_aux_mode": "next_day",
+    "epochs": 200,
+    "patience": 20,
+    "lr": 0.001,
+    "batch_size": 32,
+    "alpha": 1.0,
+    "beta": 0.2,
+    "gamma": null,
+    "gamma_env": 0.05,
+    "gamma_ct": 0.1,
+    "ct_aux_loss": "huber",
+    "lag_spread_weight": 0.01,
+    "weight_decay": 0.0001,
+    "output_dir": "artifacts/dynamic_hlb_legacy_agro_full5"
+  },
+  "windows": [
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 0.6,
+      "future_event_n_std": 0.48989794855663565,
+      "ctd_mean": 0.564102564102564,
+      "ctd_std": 0.036261886214694776,
+      "bstd_mean": 0.04387025602791635,
+      "bstd_std": 0.03135973699674351
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 2.0,
+      "future_event_n_std": 0.6324555320336759,
+      "ctd_mean": 0.5196483516483517,
+      "ctd_std": 0.13775136907195487,
+      "bstd_mean": 0.14225578004850276,
+      "bstd_std": 0.03209246540138549
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "eligible_n_mean": 12.0,
+      "eligible_n_std": 0.6324555320336759,
+      "future_event_n_mean": 0.6,
+      "future_event_n_std": 0.48989794855663565,
+      "ctd_mean": 0.42676767676767674,
+      "ctd_std": 0.3464108978540157,
+      "bstd_mean": 0.05936137359297351,
+      "bstd_std": 0.026317047641444553
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "eligible_n_mean": 12.0,
+      "eligible_n_std": 0.6324555320336759,
+      "future_event_n_mean": 2.4,
+      "future_event_n_std": 0.8,
+      "ctd_mean": 0.5622733951502654,
+      "ctd_std": 0.1803187755089438,
+      "bstd_mean": 1.1526356914378835,
+      "bstd_std": 1.168482838599961
+    }
+  ]
+}

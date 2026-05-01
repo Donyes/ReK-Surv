@@ -1,0 +1,129 @@
+{
+  "repeat": 0,
+  "seed": 42,
+  "train_trees": 78,
+  "val_trees": 20,
+  "test_trees": 25,
+  "train_prefix_samples": 606,
+  "val_prefix_samples": 160,
+  "train_ct_aux_valid_n": 528,
+  "val_ct_aux_valid_n": 140,
+  "best_epoch": 1,
+  "best_val_mean_ctd": 0.4041666666666666,
+  "ct_aux_enabled": true,
+  "ct_aux_loss": "huber",
+  "ct_target_mean": -0.25374123454093933,
+  "ct_target_std": 5.279128074645996,
+  "ct_target_count": 528,
+  "static_feature_dim": 12,
+  "static_feature_names": [
+    "树龄",
+    "树势",
+    "东西冠幅",
+    "南北冠幅",
+    "树干高",
+    "树高",
+    "variety_1",
+    "variety_2",
+    "variety_3",
+    "variety_4",
+    "variety_5",
+    "has_diseased_neighbor"
+  ],
+  "history": [
+    {
+      "epoch": 1,
+      "train_total_loss": 1.90446669787857,
+      "train_ll_loss": 1.6293590446509938,
+      "train_rank_loss": 0.9544682652249982,
+      "train_env_aux_loss": 0.8593406474629645,
+      "train_ct_aux_loss": 0.4124696967822097,
+      "val_total_loss": 1.724454927444458,
+      "val_ll_loss": 1.5305715262889863,
+      "val_rank_loss": 0.5422444045543671,
+      "val_env_aux_loss": 0.7257046222686767,
+      "val_ct_aux_loss": 0.49149277806282043,
+      "val_ct_aux_mae": 4.381382671424321,
+      "val_ct_aux_valid_n": 140,
+      "val_mean_ctd": 0.4041666666666666,
+      "lr": 0.001
+    }
+  ],
+  "validation_windows": [
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "eligible_n": 11,
+      "future_event_n": 0,
+      "ctd": null,
+      "bstd": 0.010078247571185271
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "eligible_n": 11,
+      "future_event_n": 1,
+      "ctd": 0.9,
+      "bstd": 0.10506836489288514
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "eligible_n": 10,
+      "future_event_n": 2,
+      "ctd": 0.125,
+      "bstd": 0.17411715466290095
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "eligible_n": 10,
+      "future_event_n": 2,
+      "ctd": 0.1875,
+      "bstd": 0.18076833998890343
+    }
+  ],
+  "best_validation_prefix_metrics": {
+    "total": 1.724454927444458,
+    "ll": 1.5305715262889863,
+    "rank": 0.5422444045543671,
+    "env_aux": 0.7257046222686767,
+    "ct_aux": 0.49149277806282043,
+    "ct_aux_mae": 4.381382671424321,
+    "ct_aux_valid_n": 140
+  },
+  "test_windows": [
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "eligible_n": 14,
+      "future_event_n": 1,
+      "ctd": 1.0,
+      "bstd": 0.06609323498925031
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "eligible_n": 14,
+      "future_event_n": 3,
+      "ctd": 0.5142857142857142,
+      "bstd": 0.16943750519758782
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "eligible_n": 11,
+      "future_event_n": 0,
+      "ctd": null,
+      "bstd": 0.01403020221136893
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "eligible_n": 11,
+      "future_event_n": 2,
+      "ctd": 0.16666666666666666,
+      "bstd": 0.17455814884601165
+    }
+  ]
+}

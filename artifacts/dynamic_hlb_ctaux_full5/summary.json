@@ -1,0 +1,83 @@
+{
+  "config": {
+    "data_path": "data/hlb_dataset.xlsx",
+    "landmarks": [
+      6,
+      9
+    ],
+    "pred_horizons": [
+      1,
+      3
+    ],
+    "window_pairs": null,
+    "repeats": 5,
+    "test_size": 0.2,
+    "val_ratio": 0.2,
+    "seed": 42,
+    "use_time_features": false,
+    "use_ct_aux_task": true,
+    "rnn_type": "gru",
+    "epochs": 200,
+    "patience": 20,
+    "lr": 0.001,
+    "batch_size": 32,
+    "alpha": 1.0,
+    "beta": 0.2,
+    "gamma": null,
+    "gamma_env": 0.05,
+    "gamma_ct": 0.1,
+    "ct_aux_loss": "huber",
+    "weight_decay": 0.0001,
+    "output_dir": "artifacts/dynamic_hlb_ctaux_full5"
+  },
+  "windows": [
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 0.6,
+      "future_event_n_std": 0.48989794855663565,
+      "ctd_mean": 0.8974358974358975,
+      "ctd_std": 0.036261886214694776,
+      "bstd_mean": 0.043191793837456666,
+      "bstd_std": 0.026082357355237593
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 2.0,
+      "future_event_n_std": 0.6324555320336759,
+      "ctd_mean": 0.5020659340659341,
+      "ctd_std": 0.17634985153511457,
+      "bstd_mean": 0.15363611295909235,
+      "bstd_std": 0.021801559719433847
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "eligible_n_mean": 12.0,
+      "eligible_n_std": 0.6324555320336759,
+      "future_event_n_mean": 0.6,
+      "future_event_n_std": 0.48989794855663565,
+      "ctd_mean": 0.15151515151515152,
+      "ctd_std": 0.11338355717496791,
+      "bstd_mean": 0.06162807780551801,
+      "bstd_std": 0.034096271541989784
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "eligible_n_mean": 12.0,
+      "eligible_n_std": 0.6324555320336759,
+      "future_event_n_mean": 2.4,
+      "future_event_n_std": 0.8,
+      "ctd_mean": 0.6081849938085113,
+      "ctd_std": 0.26380609731074983,
+      "bstd_mean": 1.6420785127514939,
+      "bstd_std": 1.517801127973625
+    }
+  ]
+}

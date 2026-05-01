@@ -1,0 +1,1216 @@
+{
+  "config": {
+    "artifact_dir": "artifacts\\dynamic_hlb_ctaux_full5",
+    "window_specs": [
+      [
+        6,
+        1
+      ],
+      [
+        6,
+        3
+      ],
+      [
+        9,
+        1
+      ],
+      [
+        9,
+        3
+      ]
+    ],
+    "history_days": [
+      2,
+      7,
+      14,
+      30
+    ],
+    "repeats_used": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "summary_by_history_days": [
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 2,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 5.990205778374502e-05,
+      "delta_risk_std": 8.761610742893486e-05
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 2,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 6.945224278145664e-05,
+      "delta_risk_std": 6.0916738821650395e-05
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 2,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0007622866569727193,
+      "delta_risk_std": 0.0014043740099999639
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 2,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.00010512035239930571,
+      "delta_risk_std": 6.403923144087362e-05
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 2,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.00010541044859045152,
+      "delta_risk_std": 0.00016862896210369718
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 2,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0011483230933663434,
+      "delta_risk_std": 0.0009650176165784578
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 7,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0001541877905083311,
+      "delta_risk_std": 0.00011725580297488456
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 7,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.00023946058411335495,
+      "delta_risk_std": 0.00016988854243733023
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 7,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0010152362199733033,
+      "delta_risk_std": 0.0012635746347041807
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 7,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.00036225039223550796,
+      "delta_risk_std": 0.00020429807610537572
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 7,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0002246447489077192,
+      "delta_risk_std": 0.0003015900431850817
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 7,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.002028405255987309,
+      "delta_risk_std": 0.0014467470672864743
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 14,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0002898365737109998,
+      "delta_risk_std": 0.0001904446379313181
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 14,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0005337291825708235,
+      "delta_risk_std": 0.0003604679835360194
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 14,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.001174071020213887,
+      "delta_risk_std": 0.0014091093507563497
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 14,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0007271337822506514,
+      "delta_risk_std": 0.0003821407795690415
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 14,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0003771952257791002,
+      "delta_risk_std": 0.0004060802023178385
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 14,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.002257333995657973,
+      "delta_risk_std": 0.001579425464809621
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 30,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0007502599798499432,
+      "delta_risk_std": 0.0005234181042296918
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 30,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0013383521707146428,
+      "delta_risk_std": 0.0007786721559608422
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 30,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0014493914553895594,
+      "delta_risk_std": 0.001421315839643598
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 30,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0015975136265191142,
+      "delta_risk_std": 0.0008403806440809308
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 30,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.000705242925739315,
+      "delta_risk_std": 0.0005652985355164328
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "history_days": 30,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0024971422681119293,
+      "delta_risk_std": 0.0016594389227849561
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 2,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.00043184318519138285,
+      "delta_risk_std": 0.0009124003652289922
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 2,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.0002662220642378088,
+      "delta_risk_std": 0.0004148950300928513
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 2,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.0010587462552939541,
+      "delta_risk_std": 0.001223640913055842
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 2,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.00022696710701047937,
+      "delta_risk_std": 0.00011350605779403306
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 2,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.00026281637376866584,
+      "delta_risk_std": 0.0003867046233960443
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 2,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.0021921644365647808,
+      "delta_risk_std": 0.00155363914544453
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 7,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.0007589541464312788,
+      "delta_risk_std": 0.0009537490193431244
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 7,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.0007096267745267445,
+      "delta_risk_std": 0.0006088455659608218
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 7,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.00186809147358872,
+      "delta_risk_std": 0.0015884292030053028
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 7,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.0007907002944677616,
+      "delta_risk_std": 0.0003500911858338276
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 7,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.0006318679794536105,
+      "delta_risk_std": 0.0007426563608841295
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 7,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.003970120793383103,
+      "delta_risk_std": 0.002658656773684054
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 14,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.0010978198879456613,
+      "delta_risk_std": 0.0010179494327766864
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 14,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.0013402858739330744,
+      "delta_risk_std": 0.0008057132627844044
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 14,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.0023228822072269397,
+      "delta_risk_std": 0.0020093852483075957
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 14,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.001586493402839337,
+      "delta_risk_std": 0.0006668739958321168
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 14,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.001152463032381742,
+      "delta_risk_std": 0.001286784630939955
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 14,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.004596813063835725,
+      "delta_risk_std": 0.0029987938176346306
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 30,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.002035709509800654,
+      "delta_risk_std": 0.0012350220708654581
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 30,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.0029612532793544233,
+      "delta_risk_std": 0.00130470807565835
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 30,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.003061715888325125,
+      "delta_risk_std": 0.0021487879188817273
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 30,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.003464762978445262,
+      "delta_risk_std": 0.0014228855611165755
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 30,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.0018885072561845716,
+      "delta_risk_std": 0.0013228575120083311
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "history_days": 30,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.005269666484673507,
+      "delta_risk_std": 0.0033375384131816535
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 2,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 3.0729073624158334e-05,
+      "delta_risk_std": 6.366990068129008e-05
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 2,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 2.608675711703275e-05,
+      "delta_risk_std": 5.382543342444407e-05
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 2,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0005554154521632881,
+      "delta_risk_std": 0.001071506461975395
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 2,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 8.631275353784975e-05,
+      "delta_risk_std": 6.716849187541855e-05
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 2,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 9.925093103545026e-05,
+      "delta_risk_std": 0.00018886749244845306
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 2,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0005969086187178618,
+      "delta_risk_std": 0.0009282558133209566
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 7,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 7.310025192950321e-05,
+      "delta_risk_std": 0.00012405946833076253
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 7,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 8.491723249449024e-05,
+      "delta_risk_std": 0.00012116981263056376
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 7,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0011829072250111494,
+      "delta_risk_std": 0.0015092059032316405
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 7,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.00028612702310093865,
+      "delta_risk_std": 0.00020422219605303025
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 7,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.00021823679439876288,
+      "delta_risk_std": 0.0003439101307138919
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 7,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0008145891413732897,
+      "delta_risk_std": 0.0008469051738148251
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 14,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.00014641799408536825,
+      "delta_risk_std": 0.00019589157969722082
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 14,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0001429335442420173,
+      "delta_risk_std": 0.0001682508575456629
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 14,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0013439058685617055,
+      "delta_risk_std": 0.0016997337469258234
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 14,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0005772898425568852,
+      "delta_risk_std": 0.00039289386976028404
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 14,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0003009622425711963,
+      "delta_risk_std": 0.00044519000092924847
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 14,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0011479569868242834,
+      "delta_risk_std": 0.0011798548543399002
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 30,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0003310397154336897,
+      "delta_risk_std": 0.00039580161872644816
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 30,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.00027016043471424683,
+      "delta_risk_std": 0.00020956369274212954
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 30,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0015029134234646336,
+      "delta_risk_std": 0.001922182674656635
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 30,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0012856263951406407,
+      "delta_risk_std": 0.0008207029075949227
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 30,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0004678175479057245,
+      "delta_risk_std": 0.0006283353502775543
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "history_days": 30,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.001277877070242539,
+      "delta_risk_std": 0.0013300938949048552
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 2,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 9.640552664045288e-05,
+      "delta_risk_std": 0.00019598833237030773
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 2,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 8.339970181699149e-05,
+      "delta_risk_std": 0.00017177582685176792
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 2,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0011016413637480581,
+      "delta_risk_std": 0.001684583635253523
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 2,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0002430520745883246,
+      "delta_risk_std": 0.00011555171724346546
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 2,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0002554003352802933,
+      "delta_risk_std": 0.00039591319040930563
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 2,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0012064102345902938,
+      "delta_risk_std": 0.001461241961676987
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 7,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.00024087074805549945,
+      "delta_risk_std": 0.0003797942081585556
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 7,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.00025628911034952274,
+      "delta_risk_std": 0.0003288391785799104
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 7,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.002554333376465365,
+      "delta_risk_std": 0.0023849790302953515
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 7,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0008381727353491291,
+      "delta_risk_std": 0.0003595361344957508
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 7,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0005456170877810759,
+      "delta_risk_std": 0.0007290458263663685
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 7,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0023713287897408008,
+      "delta_risk_std": 0.002088688580777229
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 14,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.00047280098947339867,
+      "delta_risk_std": 0.0005600239524032085
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 14,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0004512625329274063,
+      "delta_risk_std": 0.00041541487676167977
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 14,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0029108535160776226,
+      "delta_risk_std": 0.002697432669817091
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 14,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0016980507716473285,
+      "delta_risk_std": 0.0007020147981581237
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 14,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.000767434221467868,
+      "delta_risk_std": 0.00094830269856315
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 14,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0031281214556656777,
+      "delta_risk_std": 0.002623671545532607
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 30,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0009779458245247953,
+      "delta_risk_std": 0.0008941791896262165
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 30,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0009318451472790912,
+      "delta_risk_std": 0.0005231287722447006
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 30,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.003306001267628744,
+      "delta_risk_std": 0.003107952523120571
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 30,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0037543577174751776,
+      "delta_risk_std": 0.001412812622941027
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 30,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0012244527248965044,
+      "delta_risk_std": 0.0013269447631182102
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "history_days": 30,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0034561078588012605,
+      "delta_risk_std": 0.002879626993085262
+    }
+  ],
+  "summary_aggregate": [
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0003135466004632548,
+      "delta_risk_std": 0.00039065155389657243
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0005452485450450694,
+      "delta_risk_std": 0.0006549062259793006
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0011002463381373673,
+      "delta_risk_std": 0.0013780774885189424
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0006399582252978139,
+      "delta_risk_std": 0.0006996919743426554
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0003531233372541465,
+      "delta_risk_std": 0.0004457340698164408
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 1,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0019828011532808886,
+      "delta_risk_std": 0.0014748959983784764
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.0010810816823422441,
+      "delta_risk_std": 0.0011942063128227416
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.0013193469980130128,
+      "delta_risk_std": 0.0013288972292923166
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.0020778589561086845,
+      "delta_risk_std": 0.0018988908274502304
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.001391368675260549,
+      "delta_risk_std": 0.0013966081437485351
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.0009839136604471476,
+      "delta_risk_std": 0.001174685962496656
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 14.0,
+      "future_event_n_mean": 2.0,
+      "delta_risk_mean": 0.004007191194614279,
+      "delta_risk_std": 0.0028595298996357318
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.00014532175876817987,
+      "delta_risk_std": 0.0002576166956623977
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.00013102449214194678,
+      "delta_risk_std": 0.00017467666733970652
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0011462854923001942,
+      "delta_risk_std": 0.0015990864711813034
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.000529333785260205,
+      "delta_risk_std": 0.0006308900627175814
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0002715668789777835,
+      "delta_risk_std": 0.00044812278563572056
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 1,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 0.6,
+      "delta_risk_mean": 0.0009593329542894935,
+      "delta_risk_std": 0.001080770686240576
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "lag_bin": "days_15_30",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.00044700577217353653,
+      "delta_risk_std": 0.0006582231713080592
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "lag_bin": "days_31_60",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0004306991230932529,
+      "delta_risk_std": 0.0004960416272051751
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "lag_bin": "days_3_7",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0024682073809799477,
+      "delta_risk_std": 0.0026215768975328037
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "lag_bin": "days_60_plus",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0015471009293557825,
+      "delta_risk_std": 0.0015134784498617325
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "lag_bin": "days_8_14",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0006982260923564354,
+      "delta_risk_std": 0.0009722066431256867
+    },
+    {
+      "landmark": 9,
+      "pred_horizon": 3,
+      "lag_bin": "last_2_days",
+      "eligible_n_mean": 12.0,
+      "future_event_n_mean": 2.4,
+      "delta_risk_mean": 0.0025404920846995084,
+      "delta_risk_std": 0.002401838397236687
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "memory_version": "0.1.0",
+  "project_name": "ReK-Surv",
+  "context_budgets": {
+    "startup_brief_tokens": 1200,
+    "retrieval_tokens": 800,
+    "entry_tokens": 120
+  },
+  "retrieval": {
+    "default_limit": 8,
+    "default_collections": [
+      "experiments",
+      "decisions",
+      "findings",
+      "bottlenecks"
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+- 项目身份：ReK-Surv 上的 HLB 时变协变量生存分析主线。
+- 当前主线模型：`period_ms_tree_query`。
+- 方法演化关系：`period_ms` 是先提出的时期级多尺度农业环境建模框架；`period_ms_tree_query` 是在 `period_ms` 上加入树特异性时期注意力后的增强版，不是独立替代路线。
+- 数据集：`data/hlb_dataset.xlsx`。
+- 当前评估协议：tree-level repeated random hold-out（5 次 repeat），不是 `k-fold CV`；风险输出按时期而不是按天。
+- 当前研究焦点：在保持时期级建模和 landmark prefix expansion 的前提下，比较 `period_ms`、`period_ms_tree_query` 与外部基线（尤其是 Dynamic-DeepHit），并整理论文/组会叙事。
+- 当前关键风险：不同窗口组合上的稳定性仍需继续核实；`tree-specific attention` 已经存在，但其收益是否在更广窗口和外部基线上持续成立，仍需要实验支撑。

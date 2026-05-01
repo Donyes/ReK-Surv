@@ -1,0 +1,176 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1050" viewBox="0 0 1800 1050">
+  <defs>
+    <style>
+      .bg { fill: #f7f8fb; }
+      .panel { fill: #ffffff; stroke: #d7dce8; stroke-width: 2; }
+      .input { fill: #e9f2ff; stroke: #5e8fd6; stroke-width: 2.3; }
+      .encode { fill: #eef8ef; stroke: #5aa167; stroke-width: 2.3; }
+      .attn { fill: #fff4dc; stroke: #c99025; stroke-width: 2.3; }
+      .fusion { fill: #f2efff; stroke: #8c73d8; stroke-width: 2.3; }
+      .output { fill: #ffecec; stroke: #d96767; stroke-width: 2.3; }
+      .aux { fill: #edf7f8; stroke: #5599a3; stroke-width: 2.3; stroke-dasharray: 8 6; }
+      .mask { fill: #f2f4f8; stroke: #98a2b3; stroke-width: 2; stroke-dasharray: 6 6; }
+      .title { font-family: "Segoe UI", Arial, sans-serif; font-size: 34px; font-weight: 700; fill: #172033; }
+      .subtitle { font-family: "Segoe UI", Arial, sans-serif; font-size: 18px; fill: #526070; }
+      .label { font-family: "Segoe UI", Arial, sans-serif; font-size: 21px; font-weight: 700; fill: #172033; }
+      .text { font-family: "Segoe UI", Arial, sans-serif; font-size: 17px; fill: #334155; }
+      .small { font-family: "Segoe UI", Arial, sans-serif; font-size: 14px; fill: #526070; }
+      .math { font-family: "Cambria Math", "Times New Roman", serif; font-size: 17px; fill: #1f2937; }
+      .tiny { font-family: "Segoe UI", Arial, sans-serif; font-size: 12px; fill: #64748b; }
+      .arrow { stroke: #334155; stroke-width: 2.7; fill: none; marker-end: url(#arrowhead); }
+      .arrow-soft { stroke: #64748b; stroke-width: 2.2; fill: none; marker-end: url(#arrowheadSoft); }
+      .arrow-dash { stroke: #5599a3; stroke-width: 2.4; fill: none; stroke-dasharray: 8 6; marker-end: url(#arrowheadAux); }
+    </style>
+    <marker id="arrowhead" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
+      <path d="M0,0 L12,4 L0,8 Z" fill="#334155"/>
+    </marker>
+    <marker id="arrowheadSoft" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
+      <path d="M0,0 L12,4 L0,8 Z" fill="#64748b"/>
+    </marker>
+    <marker id="arrowheadAux" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
+      <path d="M0,0 L12,4 L0,8 Z" fill="#5599a3"/>
+    </marker>
+    <linearGradient id="riskGrad" x1="0" x2="1">
+      <stop offset="0%" stop-color="#ffd7d7"/>
+      <stop offset="100%" stop-color="#e84f4f"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#172033" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1800" height="1050"/>
+  <text class="title" x="70" y="62">period_ms_tree_query: Tree-specific Period Attention for Dynamic HLB Risk Prediction</text>
+  <text class="subtitle" x="72" y="92">Period-level environmental representation + static-tree-conditioned attention + discrete-time survival head</text>
+
+  <rect class="panel" x="55" y="125" width="1690" height="845" rx="18" filter="url(#shadow)"/>
+
+  <text class="label" x="105" y="173">Inputs</text>
+  <text class="label" x="505" y="173">Encoders</text>
+  <text class="label" x="870" y="173">Tree-specific Period Selection</text>
+  <text class="label" x="1325" y="173">Prediction Heads</text>
+
+  <!-- Inputs -->
+  <rect class="input" x="90" y="215" width="290" height="145" rx="14"/>
+  <text class="label" x="116" y="252">Period Environmental Features</text>
+  <text class="math" x="116" y="286">X<tspan baseline-shift="sub">1:l</tspan> ∈ R<tspan baseline-shift="super">l × d</tspan></text>
+  <text class="text" x="116" y="318">13 observation periods</text>
+  <text class="small" x="116" y="343">mean / std / min / max / slope + trailing stats</text>
+
+  <rect class="input" x="90" y="430" width="290" height="150" rx="14"/>
+  <text class="label" x="116" y="467">Static Tree Features</text>
+  <text class="math" x="116" y="501">z<tspan baseline-shift="sub">i</tspan> ∈ R<tspan baseline-shift="super">d_s</tspan></text>
+  <text class="text" x="116" y="533">age, vigor, canopy, height</text>
+  <text class="small" x="116" y="558">variety + diseased-neighbor indicator</text>
+
+  <rect class="input" x="90" y="650" width="290" height="120" rx="14"/>
+  <text class="label" x="116" y="687">Landmark Period</text>
+  <text class="math" x="116" y="721">l ∈ {1, ..., 12}</text>
+  <text class="small" x="116" y="746">Only history up to period l is visible</text>
+
+  <!-- Encoders -->
+  <rect class="encode" x="470" y="220" width="285" height="130" rx="14"/>
+  <text class="label" x="498" y="258">Period Projector</text>
+  <text class="math" x="498" y="292">KAN: d → 32 → 32</text>
+  <text class="small" x="498" y="321">produces period tokens h<tspan baseline-shift="sub">p</tspan></text>
+
+  <rect class="encode" x="470" y="430" width="285" height="130" rx="14"/>
+  <text class="label" x="498" y="468">Static Encoder</text>
+  <text class="math" x="498" y="502">MLP: d_s → 32</text>
+  <text class="small" x="498" y="531">tree susceptibility summary s<tspan baseline-shift="sub">i</tspan></text>
+
+  <rect class="encode" x="470" y="650" width="285" height="120" rx="14"/>
+  <text class="label" x="498" y="687">Landmark Embedding</text>
+  <text class="math" x="498" y="721">Embedding(l) → 8</text>
+  <text class="small" x="498" y="746">prediction origin information</text>
+
+  <!-- Tree-specific attention internals -->
+  <rect class="attn" x="830" y="215" width="390" height="105" rx="14"/>
+  <text class="label" x="858" y="252">Static-conditioned FiLM</text>
+  <text class="math" x="858" y="286">h′<tspan baseline-shift="sub">p,i</tspan> = h<tspan baseline-shift="sub">p</tspan> · (1 + γ(s<tspan baseline-shift="sub">i</tspan>)) + β(s<tspan baseline-shift="sub">i</tspan>)</text>
+
+  <rect class="attn" x="830" y="370" width="390" height="175" rx="14"/>
+  <text class="label" x="858" y="407">Tree-specific Attention Score</text>
+  <text class="math" x="858" y="441">score<tspan baseline-shift="sub">i,p</tspan> = vᵀ tanh(</text>
+  <text class="math" x="892" y="472">W<tspan baseline-shift="sub">p</tspan>h′<tspan baseline-shift="sub">p,i</tspan> + W<tspan baseline-shift="sub">lag</tspan>e<tspan baseline-shift="sub">l-p</tspan></text>
+  <text class="math" x="892" y="503">+ W<tspan baseline-shift="sub">s</tspan>s<tspan baseline-shift="sub">i</tspan> + W<tspan baseline-shift="sub">int</tspan>(h′<tspan baseline-shift="sub">p,i</tspan> ⊙ gate(s<tspan baseline-shift="sub">i</tspan>)))</text>
+  <text class="small" x="858" y="528">static features influence which historical periods are selected</text>
+
+  <rect class="mask" x="830" y="590" width="390" height="100" rx="14"/>
+  <text class="label" x="858" y="626">History Mask + Softmax</text>
+  <text class="math" x="858" y="660">α<tspan baseline-shift="sub">i,p</tspan> = softmax(score<tspan baseline-shift="sub">i,p</tspan>), p ≤ l</text>
+  <text class="small" x="858" y="683">future periods are masked</text>
+
+  <rect class="fusion" x="830" y="745" width="390" height="125" rx="14"/>
+  <text class="label" x="858" y="782">Period Context + Max Pool</text>
+  <text class="math" x="858" y="816">c<tspan baseline-shift="sub">i</tspan> = Σ<tspan baseline-shift="sub">p≤l</tspan> α<tspan baseline-shift="sub">i,p</tspan>h′<tspan baseline-shift="sub">p,i</tspan></text>
+  <text class="small" x="858" y="845">context captures weighted history; max pool keeps salient period states</text>
+
+  <!-- Fusion -->
+  <rect class="fusion" x="1280" y="405" width="350" height="155" rx="14"/>
+  <text class="label" x="1310" y="442">Fused Representation</text>
+  <text class="math" x="1310" y="476">r<tspan baseline-shift="sub">i,l</tspan> = [c<tspan baseline-shift="sub">i</tspan>, maxpool, s<tspan baseline-shift="sub">i</tspan>, emb(l)]</text>
+  <text class="math" x="1310" y="510">32 + 32 + 32 + 8 = 104</text>
+  <text class="small" x="1310" y="538">tree-specific history representation at landmark l</text>
+
+  <!-- Outputs -->
+  <rect class="output" x="1320" y="205" width="285" height="135" rx="14"/>
+  <text class="label" x="1348" y="242">Survival Head</text>
+  <text class="math" x="1348" y="276">KAN: 104 → 32 → 14</text>
+  <text class="small" x="1348" y="305">13 event logits + tail probability</text>
+
+  <rect class="output" x="1320" y="620" width="285" height="135" rx="14"/>
+  <text class="label" x="1348" y="657">Discrete-time Risk</text>
+  <text class="math" x="1348" y="691">P(T = k | T &gt; l, X≤l, z<tspan baseline-shift="sub">i</tspan>)</text>
+  <text class="small" x="1348" y="720">cumulative risk for l+1 ... l+h</text>
+
+  <rect class="aux" x="1320" y="820" width="285" height="105" rx="14"/>
+  <text class="label" x="1348" y="856">CT Auxiliary Head</text>
+  <text class="math" x="1348" y="890">MLP: 104 → 32 → 1</text>
+  <text class="small" x="1348" y="915">predicts ΔCT(l) during training only</text>
+
+  <!-- Risk mini bars -->
+  <g transform="translate(1370,760)">
+    <rect x="0" y="0" width="28" height="42" rx="5" fill="url(#riskGrad)" opacity="0.55"/>
+    <rect x="38" y="-15" width="28" height="57" rx="5" fill="url(#riskGrad)" opacity="0.75"/>
+    <rect x="76" y="-3" width="28" height="45" rx="5" fill="url(#riskGrad)" opacity="0.62"/>
+    <rect x="114" y="-27" width="28" height="69" rx="5" fill="url(#riskGrad)" opacity="0.88"/>
+    <rect x="152" y="-9" width="28" height="51" rx="5" fill="url(#riskGrad)" opacity="0.70"/>
+    <text class="tiny" x="-2" y="65">l+1</text>
+    <text class="tiny" x="112" y="65">...</text>
+    <text class="tiny" x="149" y="65">l+h</text>
+  </g>
+
+  <!-- Arrows -->
+  <path class="arrow" d="M380,288 C415,288 430,285 470,285"/>
+  <path class="arrow" d="M755,285 C785,285 800,268 830,268"/>
+  <path class="arrow" d="M380,505 C415,505 430,495 470,495"/>
+  <path class="arrow" d="M755,495 C795,495 795,445 830,445"/>
+  <path class="arrow-soft" d="M755,495 C790,495 790,262 830,262"/>
+  <path class="arrow-soft" d="M380,710 C415,710 430,710 470,710"/>
+  <path class="arrow-soft" d="M755,710 C805,710 805,640 830,640"/>
+  <path class="arrow" d="M1025,320 L1025,370"/>
+  <path class="arrow" d="M1025,545 L1025,590"/>
+  <path class="arrow" d="M1025,690 L1025,745"/>
+  <path class="arrow" d="M1220,807 C1265,807 1255,480 1280,480"/>
+  <path class="arrow-soft" d="M755,495 C980,495 1080,470 1280,480"/>
+  <path class="arrow-soft" d="M755,710 C1040,710 1120,520 1280,505"/>
+  <path class="arrow" d="M1455,405 L1455,340"/>
+  <path class="arrow" d="M1462,560 L1462,620"/>
+  <path class="arrow" d="M1462,340 C1462,392 1462,568 1462,620"/>
+  <path class="arrow-dash" d="M1462,560 C1462,650 1462,745 1462,820"/>
+
+  <!-- Legend and notes -->
+  <rect class="panel" x="90" y="850" width="650" height="85" rx="14"/>
+  <circle cx="125" cy="885" r="9" fill="#e9f2ff" stroke="#5e8fd6"/>
+  <text class="small" x="143" y="890">model input available at deployment</text>
+  <circle cx="335" cy="885" r="9" fill="#fff4dc" stroke="#c99025"/>
+  <text class="small" x="353" y="890">attention mechanism</text>
+  <circle cx="515" cy="885" r="9" fill="#edf7f8" stroke="#5599a3"/>
+  <text class="small" x="533" y="890">training-only auxiliary supervision</text>
+  <text class="tiny" x="118" y="920">Sheet4 CT values are labels for the auxiliary head, not model inputs.</text>
+
+  <rect class="mask" x="1280" y="95" width="350" height="78" rx="14"/>
+  <text class="small" x="1310" y="126">Landmark-aware survival output</text>
+  <text class="math" x="1310" y="154">event logits for k ≤ l are masked before softmax</text>
+</svg>
