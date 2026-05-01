@@ -96,6 +96,7 @@ def instantiate_model(tree_data, static_x: np.ndarray, config: Dict) -> DynamicR
         env_aux_mode=str(config.get("env_aux_mode", "none")),
         tree_attention_dropout=float(config.get("tree_attention_dropout", 0.10)),
         static_attention_dim=int(config.get("static_attention_dim", 32)),
+        ct_delta_output_dim=int(config.get("ct_delta_output_dim", 1)),
     )
 
 

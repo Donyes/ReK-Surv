@@ -1,6 +1,6 @@
 # Active Context
 
-- Updated: 2026-05-01T15:57:58.5925775+08:00
-- Current focus: trigger_orchard_v2 calibration tuning after the first gamma_ct increase test
-- Latest outcome: Doubling `gamma_ct` from 0.10 to 0.20 in the matched 5-repeat `trigger_orchard_v2` run improved the validation CT auxiliary MAE (about 4.02 -> 3.86) and sharply reduced test BStd on the hardest matched window `9->3` (about 1.60 -> 0.77), but it also reduced overall matched-window test Ctd (about 0.655 -> 0.469), especially on `6->1`, `6->3`, and `9->1`.
-- Main blocker: Stronger CT supervision helps calibration but over-regularizes ranking, so the next tuning step should avoid another large global increase and instead test a milder `gamma_ct` or a cleaner CT target.
+- Updated: 2026-05-01T23:49:53+08:00
+- Current focus: trigger_orchard_v2 CT-vector gamma scan and branch comparison
+- Latest outcome: This session finished the trigger_orchard_v2 CT-vector gamma_ct scan at 0.5 and 1.0, compared those runs against the 0.1 CT-vector reference, and then compared the best v2 setting against the older trigger_orchard gamma_ct=0.1 baseline. The stable outcome is that gamma_ct=0.5 is dominated, gamma_ct=1.0 is best only if overall ranking is prioritized, and the older trigger_orchard scalar-head baseline remains the more balanced reference on the main 6->3 and 9->3 windows plus BStd.
+- Main blocker: There is still no trigger_orchard_v2 CT-vector setting that jointly improves ranking, calibration, and CT fit, and the branch still does not cleanly dominate the older scalar-head trigger_orchard baseline.

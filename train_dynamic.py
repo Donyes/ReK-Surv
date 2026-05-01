@@ -167,6 +167,34 @@ def build_explicit_window_specs(window_pairs: Sequence[str], num_periods: int) -
     return window_specs
 
 
+def configure_ct_aux_target(args: argparse.Namespace, window_specs: Sequence[Tuple[int, int]]) -> None:
+    model_type = str(args.model_type).strip().lower()
+    use_vector_target = bool(args.use_ct_aux_task and model_type == "trigger_orchard_v2")
+    if not use_vector_target:
+        args.ct_aux_target_mode = "disabled" if not args.use_ct_aux_task else "next_delta"
+        args.ct_delta_output_dim = 1
+        args.ct_aux_window_specs = []
+        return
+
+    max_endpoint = max((int(landmark) + int(horizon) for landmark, horizon in window_specs), default=1)
+    args.ct_aux_target_mode = "window_prefix_vector"
+    args.ct_delta_output_dim = max(max_endpoint - 1, 1)
+    args.ct_aux_window_specs = [(int(landmark), int(horizon)) for landmark, horizon in window_specs]
+
+
+def ct_prefix_sample_kwargs(args: argparse.Namespace) -> Dict[str, object]:
+    if getattr(args, "ct_aux_target_mode", "") != "window_prefix_vector":
+        return {}
+    return {
+        "ct_delta_output_dim": int(args.ct_delta_output_dim),
+        "ct_aux_window_specs": args.ct_aux_window_specs,
+    }
+
+
+def count_ct_aux_valid_targets(samples: Sequence[PrefixSample]) -> int:
+    return int(sum(np.asarray(sample.ct_aux_mask, dtype=np.float32).sum() for sample in samples))
+
+
 def build_weighted_sampler(samples: Sequence[PrefixSample]) -> WeightedRandomSampler:
     landmark_counts = Counter(sample.landmark_period for sample in samples)
     future_event_count = sum(sample.future_event for sample in samples)
@@ -206,6 +234,7 @@ def instantiate_model(args: argparse.Namespace, tree_data, static_x: np.ndarray)
         env_aux_mode=args.env_aux_mode,
         tree_attention_dropout=args.tree_attention_dropout,
         static_attention_dim=args.static_attention_dim,
+        ct_delta_output_dim=getattr(args, "ct_delta_output_dim", 1),
     )
 
 
@@ -353,6 +382,7 @@ def evaluate_prefix_losses(
                 ct_aux_mask=batch["ct_aux_mask"],
                 target_mean=ct_target_mean,
                 target_std=ct_target_std,
+                ct_aux_window_mask=batch.get("ct_aux_window_mask"),
             )
             running_ct_abs += float(batch_ct_mae.item()) * batch_ct_count
             running_ct_count += batch_ct_count
@@ -495,15 +525,18 @@ def run_repeat(
     static_x, static_feature_names = transform_static_features(tree_data, preprocessor)
 
     include_landmark_zero = args.model_type != "legacy_period_mean"
+    ct_sample_kwargs = ct_prefix_sample_kwargs(args)
     train_samples = build_prefix_samples(
         tree_data,
         train_indices,
         include_landmark_zero=include_landmark_zero,
+        **ct_sample_kwargs,
     )
     val_samples = build_prefix_samples(
         tree_data,
         val_indices,
         include_landmark_zero=include_landmark_zero,
+        **ct_sample_kwargs,
     )
     if args.train_landmark_subset is not None:
         train_samples = build_prefix_samples(
@@ -511,12 +544,14 @@ def run_repeat(
             train_indices,
             include_landmark_zero=include_landmark_zero,
             allowed_landmarks=args.train_landmark_subset,
+            **ct_sample_kwargs,
         )
         val_samples = build_prefix_samples(
             tree_data,
             val_indices,
             include_landmark_zero=include_landmark_zero,
             allowed_landmarks=args.train_landmark_subset,
+            **ct_sample_kwargs,
         )
 
     ct_target_stats = {"mean": 0.0, "std": 1.0, "count": 0}
@@ -692,14 +727,21 @@ def run_repeat(
         "test_trees": int(len(test_indices)),
         "train_prefix_samples": int(len(train_samples)),
         "val_prefix_samples": int(len(val_samples)),
-        "train_ct_aux_valid_n": int(sum(sample.ct_aux_mask for sample in train_samples)),
-        "val_ct_aux_valid_n": int(sum(sample.ct_aux_mask for sample in val_samples)),
+        "train_ct_aux_valid_n": count_ct_aux_valid_targets(train_samples),
+        "val_ct_aux_valid_n": count_ct_aux_valid_targets(val_samples),
         "best_epoch": int(best_epoch),
         "best_val_mean_ctd": float(best_val_ctd),
         "model_type": args.model_type,
         "use_agro_features": bool(args.use_agro_features),
         "use_tree_id_spatial": bool(args.use_tree_id_spatial),
         "ct_aux_enabled": bool(args.use_ct_aux_task),
+        "ct_aux_target_mode": getattr(
+            args,
+            "ct_aux_target_mode",
+            "disabled" if not args.use_ct_aux_task else "next_delta",
+        ),
+        "ct_delta_output_dim": int(getattr(args, "ct_delta_output_dim", 1)),
+        "ct_aux_window_specs": [list(spec) for spec in getattr(args, "ct_aux_window_specs", [])],
         "ct_aux_loss": args.ct_aux_loss,
         "env_aux_mode": args.env_aux_mode,
         "lag_spread_weight": float(args.lag_spread_weight),
@@ -821,6 +863,7 @@ def main() -> None:
         early_stop_window_specs = build_explicit_window_specs(args.early_stop_window_pairs, tree_data.num_periods)
     else:
         early_stop_window_specs = window_specs
+    configure_ct_aux_target(args, window_specs)
 
     print(f"Loaded {len(tree_data.tree_ids)} trees")
     print(f"Event trees: {int(tree_data.event_flag.sum())} | Censored trees: {int((1 - tree_data.event_flag).sum())}")
@@ -833,7 +876,10 @@ def main() -> None:
         f"| Period features: {args.period_feature_mode} | Env aux: {args.env_aux_mode} "
         f"| Tree spatial: {args.use_tree_id_spatial}"
     )
-    print(f"CT auxiliary task: {'on' if args.use_ct_aux_task else 'off'}")
+    print(
+        f"CT auxiliary task: {'on' if args.use_ct_aux_task else 'off'} | "
+        f"CT target mode: {args.ct_aux_target_mode} | CT output dim: {args.ct_delta_output_dim}"
+    )
 
     start_time = time.perf_counter()
     all_records: List[Dict[str, float]] = []

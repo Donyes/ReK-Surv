@@ -55,6 +55,7 @@ class DynamicReKSurv(nn.Module):
         trigger_topk: int = 5,
         tree_attention_dropout: float = 0.10,
         static_attention_dim: int = 32,
+        ct_delta_output_dim: int = 1,
     ):
         super().__init__()
         self.env_dim = env_dim
@@ -65,6 +66,7 @@ class DynamicReKSurv(nn.Module):
         self.model_type = model_type.strip().lower()
         self.env_aux_mode = env_aux_mode.strip().lower()
         self.trigger_topk = int(trigger_topk)
+        self.ct_delta_output_dim = max(int(ct_delta_output_dim), 1)
 
         day_to_period_tensor = torch.tensor(day_to_period, dtype=torch.long)
         max_days = int(day_to_period_tensor.numel())
@@ -145,6 +147,7 @@ class DynamicReKSurv(nn.Module):
                 landmark_embedding_dim=landmark_embedding_dim,
                 grid_size=grid_size,
                 spline_order=spline_order,
+                ct_delta_output_dim=self.ct_delta_output_dim,
             )
         else:
             raise ValueError(f"Unsupported model type: {model_type}")
@@ -368,6 +371,7 @@ class DynamicReKSurv(nn.Module):
         landmark_embedding_dim: int,
         grid_size: int,
         spline_order: int,
+        ct_delta_output_dim: int,
     ) -> None:
         kernel_sizes = [7, 14, 30, 60]
         branch_hidden = max(hidden_size // len(kernel_sizes), 8)
@@ -446,7 +450,7 @@ class DynamicReKSurv(nn.Module):
         self.trigger_ct_aux_head = nn.Sequential(
             nn.Linear(self.fused_dim + landmark_embedding_dim, projection_dim),
             nn.ReLU(),
-            nn.Linear(projection_dim, 1),
+            nn.Linear(projection_dim, ct_delta_output_dim),
         )
 
     def forward(

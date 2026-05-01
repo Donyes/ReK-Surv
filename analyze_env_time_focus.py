@@ -293,7 +293,20 @@ def instantiate_model(tree_data, static_x: np.ndarray, config: Dict) -> DynamicR
         env_aux_mode=str(config.get("env_aux_mode", "next_day")),
         tree_attention_dropout=float(config.get("tree_attention_dropout", 0.10)),
         static_attention_dim=int(config.get("static_attention_dim", 32)),
+        ct_delta_output_dim=int(config.get("ct_delta_output_dim", 1)),
     )
+
+
+def ct_prefix_sample_kwargs(config: Dict) -> Dict[str, object]:
+    if str(config.get("ct_aux_target_mode", "")) != "window_prefix_vector":
+        return {}
+    return {
+        "ct_delta_output_dim": int(config.get("ct_delta_output_dim", 1)),
+        "ct_aux_window_specs": [
+            (int(landmark), int(horizon))
+            for landmark, horizon in config.get("ct_aux_window_specs", [])
+        ],
+    }
 
 
 def forward_model(
@@ -1051,7 +1064,12 @@ def run_history_variant_repeat(
     val_indices = repeat_state["val_indices"]
     static_x = repeat_state["static_x"]
 
-    train_samples = build_prefix_samples(tree_data, train_indices, include_landmark_zero=True)
+    train_samples = build_prefix_samples(
+        tree_data,
+        train_indices,
+        include_landmark_zero=True,
+        **ct_prefix_sample_kwargs(artifact_config),
+    )
     train_dataset = PrefixSampleDataset(tree_data, static_x, train_samples)
     train_sampler = build_weighted_sampler(train_samples)
     train_loader = DataLoader(
@@ -1876,7 +1894,12 @@ def run_period_history_variant_repeat(
     val_indices = repeat_state["val_indices"]
     static_x = repeat_state["static_x"]
 
-    train_samples = build_prefix_samples(tree_data, train_indices, include_landmark_zero=True)
+    train_samples = build_prefix_samples(
+        tree_data,
+        train_indices,
+        include_landmark_zero=True,
+        **ct_prefix_sample_kwargs(artifact_config),
+    )
     train_dataset = PrefixSampleDataset(tree_data, static_x, train_samples)
     train_sampler = build_weighted_sampler(train_samples)
     train_loader = DataLoader(

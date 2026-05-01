@@ -126,8 +126,9 @@ class PrefixSample:
     landmark_period: int
     seq_len_days: int
     future_event: int
-    ct_aux_mask: int = 0
-    ct_delta_target: float = 0.0
+    ct_aux_mask: int | np.ndarray = 0
+    ct_delta_target: float | np.ndarray = 0.0
+    ct_aux_window_mask: np.ndarray | None = None
     current_ct: float = float("nan")
     next_ct: float = float("nan")
 
@@ -155,6 +156,12 @@ class PrefixSampleDataset(Dataset):
     def __getitem__(self, index: int) -> Dict[str, torch.Tensor]:
         sample = self.samples[index]
         tree_index = sample.tree_index
+        ct_aux_mask = np.asarray(sample.ct_aux_mask, dtype=np.float32).reshape(-1)
+        ct_delta_target = np.asarray(sample.ct_delta_target, dtype=np.float32).reshape(-1)
+        if sample.ct_aux_window_mask is None:
+            ct_aux_window_mask = np.ones((1, ct_delta_target.size), dtype=np.float32)
+        else:
+            ct_aux_window_mask = np.asarray(sample.ct_aux_window_mask, dtype=np.float32)
         return {
             "env": self.daily_env[tree_index],
             "period_env": self.period_env[tree_index],
@@ -165,8 +172,9 @@ class PrefixSampleDataset(Dataset):
             "time_period": self.time_period[tree_index],
             "event_flag": self.event_flag[tree_index],
             "tree_index": torch.tensor(tree_index, dtype=torch.long),
-            "ct_aux_mask": torch.tensor([sample.ct_aux_mask], dtype=torch.float32),
-            "ct_delta_target": torch.tensor([sample.ct_delta_target], dtype=torch.float32),
+            "ct_aux_mask": torch.tensor(ct_aux_mask, dtype=torch.float32),
+            "ct_delta_target": torch.tensor(ct_delta_target, dtype=torch.float32),
+            "ct_aux_window_mask": torch.tensor(ct_aux_window_mask, dtype=torch.float32),
             "current_ct": torch.tensor([sample.current_ct], dtype=torch.float32),
             "next_ct": torch.tensor([sample.next_ct], dtype=torch.float32),
         }
@@ -359,9 +367,20 @@ def fit_ct_delta_preprocessor(samples: Sequence[PrefixSample]) -> Dict[str, floa
     """
     Fit train-split-only standardization stats for valid CT delta targets.
     """
-    valid_targets = np.asarray(
-        [sample.ct_delta_target for sample in samples if sample.ct_aux_mask == 1],
-        dtype=np.float32,
+    valid_target_chunks = []
+    for sample in samples:
+        target = np.asarray(sample.ct_delta_target, dtype=np.float32).reshape(-1)
+        mask = np.asarray(sample.ct_aux_mask, dtype=np.float32).reshape(-1) > 0.5
+        if target.shape != mask.shape:
+            raise ValueError(
+                f"CT target and mask shapes do not match: target={target.shape}, mask={mask.shape}"
+            )
+        if mask.any():
+            valid_target_chunks.append(target[mask])
+    valid_targets = (
+        np.concatenate(valid_target_chunks, axis=0)
+        if valid_target_chunks
+        else np.asarray([], dtype=np.float32)
     )
     if valid_targets.size == 0:
         return {
@@ -490,6 +509,8 @@ def build_prefix_samples(
     tree_indices: Sequence[int],
     include_landmark_zero: bool = True,
     allowed_landmarks: Sequence[int] | None = None,
+    ct_delta_output_dim: int | None = None,
+    ct_aux_window_specs: Sequence[tuple[int, int]] | None = None,
 ) -> List[PrefixSample]:
     """
     Build prefix samples at period boundaries for trees still at risk.
@@ -498,6 +519,12 @@ def build_prefix_samples(
     upper_landmark = tree_data.num_periods - 1
     prefix_samples: List[PrefixSample] = []
     landmark_filter = None if allowed_landmarks is None else {int(value) for value in allowed_landmarks}
+    vector_ct_dim = None if ct_delta_output_dim is None else max(int(ct_delta_output_dim), 1)
+    ct_aux_window_mask = (
+        None
+        if vector_ct_dim is None
+        else _build_ct_aux_window_mask(ct_aux_window_specs, vector_ct_dim)
+    )
 
     for tree_index in tree_indices:
         tree_time_period = int(tree_data.time_period[tree_index])
@@ -505,11 +532,22 @@ def build_prefix_samples(
         for landmark_period in range(lower_landmark, last_landmark + 1):
             if landmark_filter is not None and int(landmark_period) not in landmark_filter:
                 continue
-            ct_aux_mask, ct_delta_target, current_ct, next_ct = _build_ct_aux_target(
-                tree_data=tree_data,
-                tree_index=int(tree_index),
-                landmark_period=landmark_period,
-            )
+            if vector_ct_dim is None:
+                ct_aux_mask, ct_delta_target, current_ct, next_ct = _build_ct_aux_target(
+                    tree_data=tree_data,
+                    tree_index=int(tree_index),
+                    landmark_period=landmark_period,
+                )
+                sample_window_mask = None
+            else:
+                ct_aux_mask, ct_delta_target = _build_ct_aux_vector_target(
+                    tree_data=tree_data,
+                    tree_index=int(tree_index),
+                    output_dim=vector_ct_dim,
+                )
+                current_ct = float("nan")
+                next_ct = float("nan")
+                sample_window_mask = ct_aux_window_mask
             prefix_samples.append(
                 PrefixSample(
                     tree_index=int(tree_index),
@@ -518,6 +556,7 @@ def build_prefix_samples(
                     future_event=int(tree_data.event_flag[tree_index]),
                     ct_aux_mask=ct_aux_mask,
                     ct_delta_target=ct_delta_target,
+                    ct_aux_window_mask=sample_window_mask,
                     current_ct=current_ct,
                     next_ct=next_ct,
                 )
@@ -778,6 +817,55 @@ def _load_ct_measurements(
     ct_valid_mask = ~np.isnan(ct_values)
     ct_values = np.nan_to_num(ct_values, nan=0.0).astype(np.float32)
     return ct_values, ct_valid_mask.astype(bool)
+
+
+def _build_ct_aux_window_mask(
+    window_specs: Sequence[tuple[int, int]] | None,
+    output_dim: int,
+) -> np.ndarray:
+    if output_dim <= 0:
+        raise ValueError(f"CT output dimension must be positive, got {output_dim}.")
+    if not window_specs:
+        return np.ones((1, output_dim), dtype=np.float32)
+
+    window_masks = []
+    for landmark, horizon in window_specs:
+        endpoint = int(landmark) + int(horizon)
+        target_length = max(min(endpoint - 1, output_dim), 0)
+        mask = np.zeros(output_dim, dtype=np.float32)
+        if target_length > 0:
+            mask[:target_length] = 1.0
+        window_masks.append(mask)
+    return np.stack(window_masks, axis=0).astype(np.float32)
+
+
+def _build_ct_aux_vector_target(
+    tree_data: DynamicTreeData,
+    tree_index: int,
+    output_dim: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    if tree_data.ct_values is None or tree_data.ct_valid_mask is None:
+        return (
+            np.zeros(output_dim, dtype=np.float32),
+            np.zeros(output_dim, dtype=np.float32),
+        )
+
+    max_delta_count = max(int(tree_data.num_periods) - 1, 0)
+    target = np.zeros(output_dim, dtype=np.float32)
+    mask = np.zeros(output_dim, dtype=np.float32)
+    usable_count = min(output_dim, max_delta_count)
+    if usable_count <= 0:
+        return mask, target
+
+    current_values = tree_data.ct_values[tree_index, :usable_count]
+    next_values = tree_data.ct_values[tree_index, 1 : usable_count + 1]
+    current_valid = tree_data.ct_valid_mask[tree_index, :usable_count]
+    next_valid = tree_data.ct_valid_mask[tree_index, 1 : usable_count + 1]
+    valid_delta_mask = current_valid & next_valid
+
+    target[:usable_count] = (next_values - current_values).astype(np.float32)
+    mask[:usable_count] = valid_delta_mask.astype(np.float32)
+    return mask, target
 
 
 def _build_day_to_period(

@@ -123,17 +123,19 @@ def ct_delta_auxiliary_loss(
     target_mean: float,
     target_std: float,
     loss_type: str = "huber",
+    ct_aux_window_mask: torch.Tensor | None = None,
 ) -> torch.Tensor:
     """
     CT auxiliary loss on valid prefix samples only.
     """
-    mask = ct_aux_mask.view(-1) > 0.5
+    mask = _combined_ct_aux_mask(ct_aux_mask, ct_aux_window_mask)
     if not mask.any():
         return pred_ct_delta.sum() * 0.0
 
     safe_std = max(float(target_std), 1e-8)
-    pred = pred_ct_delta.view(-1)[mask]
-    target = (ct_delta_target.view(-1)[mask] - float(target_mean)) / safe_std
+    pred, target = _align_ct_delta_tensors(pred_ct_delta, ct_delta_target, mask)
+    pred = pred[mask]
+    target = (target[mask] - float(target_mean)) / safe_std
 
     if loss_type == "huber":
         return F.huber_loss(pred, target)
@@ -148,19 +150,56 @@ def ct_delta_mean_absolute_error(
     ct_aux_mask: torch.Tensor,
     target_mean: float,
     target_std: float,
+    ct_aux_window_mask: torch.Tensor | None = None,
 ) -> tuple[torch.Tensor, int]:
     """
     Mean absolute error in the original CT-delta scale.
     """
-    mask = ct_aux_mask.view(-1) > 0.5
+    mask = _combined_ct_aux_mask(ct_aux_mask, ct_aux_window_mask)
     valid_count = int(mask.sum().item())
     if valid_count == 0:
         return pred_ct_delta.sum() * 0.0, 0
 
     safe_std = max(float(target_std), 1e-8)
-    pred = pred_ct_delta.view(-1)[mask] * safe_std + float(target_mean)
-    target = ct_delta_target.view(-1)[mask]
+    pred, target = _align_ct_delta_tensors(pred_ct_delta, ct_delta_target, mask)
+    pred = pred[mask] * safe_std + float(target_mean)
+    target = target[mask]
     return torch.abs(pred - target).mean(), valid_count
+
+
+def _combined_ct_aux_mask(
+    ct_aux_mask: torch.Tensor,
+    ct_aux_window_mask: torch.Tensor | None,
+) -> torch.Tensor:
+    sample_mask = ct_aux_mask.float()
+    if ct_aux_window_mask is None:
+        return sample_mask > 0.5
+
+    window_mask = ct_aux_window_mask.float()
+    if window_mask.dim() == sample_mask.dim():
+        combined = sample_mask * window_mask
+    elif window_mask.dim() == sample_mask.dim() + 1:
+        combined = sample_mask.unsqueeze(1) * window_mask
+    else:
+        raise ValueError(
+            "Unsupported CT auxiliary mask shapes: "
+            f"sample={tuple(sample_mask.shape)}, window={tuple(window_mask.shape)}"
+        )
+    return combined > 0.5
+
+
+def _align_ct_delta_tensors(
+    pred_ct_delta: torch.Tensor,
+    ct_delta_target: torch.Tensor,
+    mask: torch.Tensor,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    pred = pred_ct_delta
+    target = ct_delta_target
+    while pred.dim() < mask.dim():
+        pred = pred.unsqueeze(1)
+    while target.dim() < mask.dim():
+        target = target.unsqueeze(1)
+    return pred.expand_as(mask), target.expand_as(mask)
 
 
 def attention_spread_regularizer(
@@ -230,6 +269,7 @@ def compute_dynamic_loss(
             target_mean=ct_target_mean,
             target_std=ct_target_std,
             loss_type=ct_aux_loss,
+            ct_aux_window_mask=batch.get("ct_aux_window_mask"),
         )
 
     spread_loss = env_aux_loss.new_zeros(())
