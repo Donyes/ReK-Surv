@@ -30,6 +30,7 @@ class DynamicReKSurv(nn.Module):
     - period_ms: period-level multiscale attention with agricultural features
     - period_ms_tree_query: tree-specific period attention conditioned on static features
     - trigger_orchard: daily multiscale trigger-window search
+    - trigger_orchard_v2: tree-conditioned continuous-window trigger search
     """
 
     def __init__(
@@ -131,6 +132,14 @@ class DynamicReKSurv(nn.Module):
             )
         elif self.model_type == "trigger_orchard":
             self._init_trigger_orchard(
+                projection_dim=projection_dim,
+                hidden_size=hidden_size,
+                landmark_embedding_dim=landmark_embedding_dim,
+                grid_size=grid_size,
+                spline_order=spline_order,
+            )
+        elif self.model_type == "trigger_orchard_v2":
+            self._init_trigger_orchard_v2(
                 projection_dim=projection_dim,
                 hidden_size=hidden_size,
                 landmark_embedding_dim=landmark_embedding_dim,
@@ -352,6 +361,94 @@ class DynamicReKSurv(nn.Module):
             nn.Linear(projection_dim, 1),
         )
 
+    def _init_trigger_orchard_v2(
+        self,
+        projection_dim: int,
+        hidden_size: int,
+        landmark_embedding_dim: int,
+        grid_size: int,
+        spline_order: int,
+    ) -> None:
+        kernel_sizes = [7, 14, 30, 60]
+        branch_hidden = max(hidden_size // len(kernel_sizes), 8)
+
+        self.trigger_input_proj = nn.Linear(self.env_dim, projection_dim)
+        self.trigger_convs = nn.ModuleList(
+            [
+                nn.Conv1d(projection_dim, branch_hidden, kernel_size=kernel_size)
+                for kernel_size in kernel_sizes
+            ]
+        )
+        self.trigger_daily_encoder = nn.Sequential(
+            nn.Linear(projection_dim + branch_hidden * len(kernel_sizes), hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, hidden_size),
+        )
+
+        (
+            trigger_window_starts,
+            trigger_window_ends,
+            trigger_window_lengths,
+            trigger_window_types,
+            trigger_window_end_periods,
+        ) = self._build_trigger_window_catalog(kernel_sizes)
+        self.register_buffer("trigger_window_start_index", trigger_window_starts, persistent=False)
+        self.register_buffer("trigger_window_end_index", trigger_window_ends, persistent=False)
+        self.register_buffer("trigger_window_length", trigger_window_lengths, persistent=False)
+        self.register_buffer("trigger_window_type_id", trigger_window_types, persistent=False)
+        self.register_buffer("trigger_window_end_period", trigger_window_end_periods, persistent=False)
+
+        self.trigger_num_window_types = int(trigger_window_types.max().item()) + 1
+        self.trigger_window_type_embedding = nn.Embedding(self.trigger_num_window_types, projection_dim)
+        self.trigger_window_lag_embedding = nn.Embedding(self.num_periods + 1, projection_dim)
+
+        subset_dim = max(projection_dim // 2, 8)
+        token_input_dim = hidden_size + subset_dim + projection_dim * 2 + 2
+        self.expert_subset_projectors = nn.ModuleList()
+        self.expert_window_projectors = nn.ModuleList()
+        self.expert_query_projectors = nn.ModuleList()
+        for indices in self.expert_feature_indices:
+            input_dim = max(len(indices), 1)
+            self.expert_subset_projectors.append(nn.Linear(input_dim, subset_dim))
+            self.expert_window_projectors.append(
+                nn.Sequential(
+                    nn.Linear(token_input_dim, hidden_size),
+                    nn.ReLU(),
+                    nn.Linear(hidden_size, hidden_size),
+                )
+            )
+            self.expert_query_projectors.append(
+                nn.Sequential(
+                    nn.Linear(self.static_dim, hidden_size),
+                    nn.ReLU(),
+                    nn.Linear(hidden_size, hidden_size),
+                )
+            )
+
+        self.static_projector = nn.Sequential(
+            nn.Linear(self.static_dim, projection_dim),
+            nn.ReLU(),
+            nn.Linear(projection_dim, projection_dim),
+        )
+        self.static_expert_gate = nn.Sequential(
+            nn.Linear(self.static_dim, projection_dim),
+            nn.ReLU(),
+            nn.Linear(projection_dim, 3),
+        )
+        self.no_history_day = nn.Parameter(torch.zeros(hidden_size))
+        self.landmark_embedding = nn.Embedding(self.num_periods + 1, landmark_embedding_dim)
+        self.fused_dim = hidden_size * 4 + projection_dim
+        self.trigger_survival_head = KAN(
+            [self.fused_dim, hidden_size, self.num_periods + 1],
+            grid_size=grid_size,
+            spline_order=spline_order,
+        )
+        self.trigger_ct_aux_head = nn.Sequential(
+            nn.Linear(self.fused_dim + landmark_embedding_dim, projection_dim),
+            nn.ReLU(),
+            nn.Linear(projection_dim, 1),
+        )
+
     def forward(
         self,
         daily_env_prefix: torch.Tensor,
@@ -405,6 +502,13 @@ class DynamicReKSurv(nn.Module):
                 seq_len_periods=seq_len_periods,
                 landmark_period=landmark_period,
                 period_observed_mask=period_observed_mask,
+            )
+        if self.model_type == "trigger_orchard_v2":
+            return self._forward_trigger_orchard_v2(
+                daily_env_prefix=daily_env_prefix,
+                static_x=static_x,
+                seq_len_days=seq_len_days,
+                landmark_period=landmark_period,
             )
         return self._forward_trigger_orchard(
             daily_env_prefix=daily_env_prefix,
@@ -769,6 +873,136 @@ class DynamicReKSurv(nn.Module):
             spread_valid_mask=None,
         )
 
+    def _forward_trigger_orchard_v2(
+        self,
+        daily_env_prefix: torch.Tensor,
+        static_x: torch.Tensor,
+        seq_len_days: torch.Tensor,
+        landmark_period: torch.Tensor,
+    ) -> dict:
+        batch_size, max_days, _ = daily_env_prefix.shape
+
+        base = self.trigger_input_proj(daily_env_prefix)
+        conv_input = base.transpose(1, 2)
+        conv_outputs = []
+        for conv in self.trigger_convs:
+            kernel_size = int(conv.kernel_size[0])
+            padded = F.pad(conv_input, (kernel_size - 1, 0))
+            conv_outputs.append(F.relu(conv(padded)).transpose(1, 2))
+        day_hidden = self.trigger_daily_encoder(torch.cat([base] + conv_outputs, dim=-1))
+
+        window_starts = self.trigger_window_start_index.to(daily_env_prefix.device)
+        window_ends = self.trigger_window_end_index.to(daily_env_prefix.device)
+        window_lengths = self.trigger_window_length.to(daily_env_prefix.device)
+        window_types = self.trigger_window_type_id.to(daily_env_prefix.device)
+        window_end_periods = self.trigger_window_end_period.to(daily_env_prefix.device)
+
+        valid_window_mask = window_ends.unsqueeze(0) < seq_len_days.unsqueeze(1)
+        window_hidden_mean = self._pool_window_means(
+            values=day_hidden,
+            window_starts=window_starts,
+            window_ends=window_ends,
+            window_lengths=window_lengths,
+        )
+        window_type_embedding = self.trigger_window_type_embedding(window_types).unsqueeze(0).expand(batch_size, -1, -1)
+        lag_indices = (
+            landmark_period.unsqueeze(1) - window_end_periods.unsqueeze(0) + 1
+        ).clamp(min=0, max=self.num_periods)
+        lag_embedding = self.trigger_window_lag_embedding(lag_indices)
+        normalized_length = (
+            window_lengths.float() / float(max(max_days, 1))
+        ).view(1, -1, 1).expand(batch_size, -1, -1)
+        day_gap = (
+            seq_len_days.unsqueeze(1).float() - 1.0 - window_ends.unsqueeze(0).float()
+        ).clamp(min=0.0)
+        normalized_day_gap = (day_gap / float(max(max_days, 1))).unsqueeze(-1)
+
+        expert_contexts: List[torch.Tensor] = []
+        expert_day_weights: List[torch.Tensor] = []
+        expert_window_weights: List[torch.Tensor] = []
+        for expert_index, feature_indices in enumerate(self.expert_feature_indices):
+            if len(feature_indices) == 0:
+                subset = daily_env_prefix[..., :1]
+            else:
+                subset = daily_env_prefix[..., feature_indices]
+            subset_mean = self._pool_window_means(
+                values=subset,
+                window_starts=window_starts,
+                window_ends=window_ends,
+                window_lengths=window_lengths,
+            )
+            subset_proj = self.expert_subset_projectors[expert_index](subset_mean)
+            window_token_input = torch.cat(
+                [
+                    window_hidden_mean,
+                    subset_proj,
+                    window_type_embedding,
+                    lag_embedding,
+                    normalized_length,
+                    normalized_day_gap,
+                ],
+                dim=-1,
+            )
+            window_tokens = self.expert_window_projectors[expert_index](window_token_input)
+            tree_query = F.normalize(self.expert_query_projectors[expert_index](static_x), dim=1)
+            window_keys = F.normalize(window_tokens, dim=-1)
+            scores = (window_keys * tree_query.unsqueeze(1)).sum(dim=-1)
+            expert_context, day_weights, window_weights = self._topk_window_pool(
+                values=window_tokens,
+                scores=scores,
+                valid_mask=valid_window_mask,
+                window_starts=window_starts,
+                window_ends=window_ends,
+                topk=self.trigger_topk,
+                max_days=max_days,
+            )
+            expert_contexts.append(expert_context)
+            expert_day_weights.append(day_weights)
+            expert_window_weights.append(window_weights)
+
+        expert_context_tensor = torch.stack(expert_contexts, dim=1)
+        expert_day_weight_tensor = torch.stack(expert_day_weights, dim=1)
+        expert_window_weight_tensor = torch.stack(expert_window_weights, dim=1)
+
+        expert_gate = torch.softmax(self.static_expert_gate(static_x), dim=1)
+        weighted_context = (expert_gate.unsqueeze(-1) * expert_context_tensor).sum(dim=1)
+        attention_weights = (expert_gate.unsqueeze(-1) * expert_day_weight_tensor).sum(dim=1)
+        mixed_window_weights = (expert_gate.unsqueeze(-1) * expert_window_weight_tensor).sum(dim=1)
+
+        static_summary = self.static_projector(static_x)
+        head_input = torch.cat(
+            [
+                expert_context_tensor[:, 0, :],
+                expert_context_tensor[:, 1, :],
+                expert_context_tensor[:, 2, :],
+                weighted_context,
+                static_summary,
+            ],
+            dim=1,
+        )
+        all_logits = self.trigger_survival_head(head_input)
+        landmark_summary = self.landmark_embedding(
+            landmark_period.long().clamp(min=0, max=self.num_periods)
+        )
+        pred_ct_delta = self.trigger_ct_aux_head(torch.cat([head_input, landmark_summary], dim=1))
+        output = self._finalize_outputs(
+            all_logits=all_logits,
+            landmark_period=landmark_period,
+            pred_ct_delta=pred_ct_delta,
+            aux_next_env=daily_env_prefix.new_zeros(batch_size, max_days, self.env_dim),
+            attention_weights=attention_weights,
+            period_attention_weights=None,
+            spread_entropy=None,
+            spread_valid_mask=None,
+        )
+        if not self.training:
+            output["trigger_window_weights"] = mixed_window_weights
+            output["trigger_window_start_index"] = window_starts
+            output["trigger_window_end_index"] = window_ends
+            output["trigger_window_type_id"] = window_types
+            output["trigger_window_end_period"] = window_end_periods
+        return output
+
     def _finalize_outputs(
         self,
         all_logits: torch.Tensor,
@@ -868,6 +1102,88 @@ class DynamicReKSurv(nn.Module):
 
         return contexts, full_weights
 
+    def _topk_window_pool(
+        self,
+        values: torch.Tensor,
+        scores: torch.Tensor,
+        valid_mask: torch.Tensor,
+        window_starts: torch.Tensor,
+        window_ends: torch.Tensor,
+        topk: int,
+        max_days: int,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        batch_size, num_windows, hidden_dim = values.shape
+        day_weights = values.new_zeros(batch_size, max_days)
+        window_weights = values.new_zeros(batch_size, num_windows)
+        contexts = values.new_zeros(batch_size, hidden_dim)
+
+        for sample_index in range(batch_size):
+            sample_valid = torch.nonzero(valid_mask[sample_index], as_tuple=False).view(-1)
+            if sample_valid.numel() <= 0:
+                contexts[sample_index] = self.no_history_day
+                continue
+
+            sample_scores = scores[sample_index, sample_valid]
+            ordered_local = torch.argsort(sample_scores, descending=True)
+            selected_indices: List[int] = []
+            selected_ranges: List[tuple[int, int]] = []
+
+            for local_index in ordered_local.tolist():
+                window_index = int(sample_valid[local_index].item())
+                start_day = int(window_starts[window_index].item())
+                end_day = int(window_ends[window_index].item())
+                overlaps_existing = any(
+                    not (end_day < chosen_start or start_day > chosen_end)
+                    for chosen_start, chosen_end in selected_ranges
+                )
+                if overlaps_existing:
+                    continue
+                selected_indices.append(window_index)
+                selected_ranges.append((start_day, end_day))
+                if len(selected_indices) >= int(topk):
+                    break
+
+            if not selected_indices:
+                fallback_index = int(sample_valid[torch.argmax(sample_scores)].item())
+                selected_indices = [fallback_index]
+                selected_ranges = [
+                    (
+                        int(window_starts[fallback_index].item()),
+                        int(window_ends[fallback_index].item()),
+                    )
+                ]
+
+            selected_tensor = torch.tensor(selected_indices, dtype=torch.long, device=values.device)
+            selected_scores = scores[sample_index, selected_tensor]
+            selected_weights = torch.softmax(selected_scores, dim=0)
+            window_weights[sample_index, selected_tensor] = selected_weights
+            contexts[sample_index] = (
+                selected_weights.unsqueeze(1) * values[sample_index, selected_tensor]
+            ).sum(dim=0)
+
+            for local_weight, (start_day, end_day) in zip(selected_weights, selected_ranges):
+                length = max(end_day - start_day + 1, 1)
+                day_weights[sample_index, start_day : end_day + 1] += local_weight / float(length)
+
+        return contexts, day_weights, window_weights
+
+    @staticmethod
+    def _pool_window_means(
+        values: torch.Tensor,
+        window_starts: torch.Tensor,
+        window_ends: torch.Tensor,
+        window_lengths: torch.Tensor,
+    ) -> torch.Tensor:
+        batch_size, _, feature_dim = values.shape
+        prefix = torch.cat(
+            [values.new_zeros(batch_size, 1, feature_dim), values.cumsum(dim=1)],
+            dim=1,
+        )
+        gather_start = window_starts.view(1, -1, 1).expand(batch_size, -1, feature_dim)
+        gather_end = (window_ends + 1).view(1, -1, 1).expand(batch_size, -1, feature_dim)
+        window_sum = prefix.gather(1, gather_end) - prefix.gather(1, gather_start)
+        return window_sum / window_lengths.view(1, -1, 1).clamp_min(1.0)
+
     @staticmethod
     def _infer_period_day_bounds(day_to_period: torch.Tensor, num_periods: int) -> tuple[torch.Tensor, torch.Tensor]:
         start_indices = []
@@ -881,6 +1197,69 @@ class DynamicReKSurv(nn.Module):
                 start_indices.append(int(positions.min().item()))
                 end_indices.append(int(positions.max().item()))
         return torch.tensor(start_indices, dtype=torch.long), torch.tensor(end_indices, dtype=torch.long)
+
+    def _build_trigger_window_catalog(
+        self,
+        short_window_lengths: Sequence[int],
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        max_days = int(self.day_to_period_long.size(1))
+        day_to_period = self.day_to_period_long.view(-1).tolist()
+        period_starts = self.period_start_day_index.view(-1).tolist()
+        period_ends = self.period_end_day_index.view(-1).tolist()
+
+        starts: List[int] = []
+        ends: List[int] = []
+        lengths: List[float] = []
+        type_ids: List[int] = []
+        end_periods: List[int] = []
+
+        for type_id, window_length in enumerate(short_window_lengths):
+            for end_day in range(window_length - 1, max_days):
+                start_day = end_day - window_length + 1
+                starts.append(start_day)
+                ends.append(end_day)
+                lengths.append(float(window_length))
+                type_ids.append(type_id)
+                end_periods.append(int(day_to_period[end_day]))
+
+        offset = len(short_window_lengths)
+        for period_index in range(self.num_periods):
+            start_day = int(period_starts[period_index])
+            end_day = int(period_ends[period_index])
+            starts.append(start_day)
+            ends.append(end_day)
+            lengths.append(float(end_day - start_day + 1))
+            type_ids.append(offset)
+            end_periods.append(period_index + 1)
+
+        for span, type_id in ((2, offset + 1), (3, offset + 2)):
+            for end_period_index in range(span - 1, self.num_periods):
+                start_period_index = end_period_index - span + 1
+                start_day = int(period_starts[start_period_index])
+                end_day = int(period_ends[end_period_index])
+                starts.append(start_day)
+                ends.append(end_day)
+                lengths.append(float(end_day - start_day + 1))
+                type_ids.append(type_id)
+                end_periods.append(end_period_index + 1)
+
+        prefix_type_id = offset + 3
+        for end_period_index in range(self.num_periods):
+            start_day = int(period_starts[0])
+            end_day = int(period_ends[end_period_index])
+            starts.append(start_day)
+            ends.append(end_day)
+            lengths.append(float(end_day - start_day + 1))
+            type_ids.append(prefix_type_id)
+            end_periods.append(end_period_index + 1)
+
+        return (
+            torch.tensor(starts, dtype=torch.long),
+            torch.tensor(ends, dtype=torch.long),
+            torch.tensor(lengths, dtype=torch.float32),
+            torch.tensor(type_ids, dtype=torch.long),
+            torch.tensor(end_periods, dtype=torch.long),
+        )
 
     @staticmethod
     def _resolve_expert_feature_indices(env_feature_names: Sequence[str]) -> List[List[int]]:

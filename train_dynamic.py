@@ -82,7 +82,7 @@ def parse_args() -> argparse.Namespace:
         "--model_type",
         type=str,
         default="legacy",
-        choices=["legacy", "legacy_period_mean", "period_ms", "period_ms_tree_query", "trigger_orchard"],
+        choices=["legacy", "legacy_period_mean", "period_ms", "period_ms_tree_query", "trigger_orchard", "trigger_orchard_v2"],
         help="Dynamic model architecture",
     )
     parser.add_argument("--rnn_type", type=str, default="gru", choices=["gru", "lstm"], help="Sequence encoder type for the legacy model")
