@@ -1,6 +1,6 @@
 # Active Context
 
-- Updated: 2026-05-01T23:49:53+08:00
-- Current focus: trigger_orchard_v2 CT-vector gamma scan and branch comparison
-- Latest outcome: This session finished the trigger_orchard_v2 CT-vector gamma_ct scan at 0.5 and 1.0, compared those runs against the 0.1 CT-vector reference, and then compared the best v2 setting against the older trigger_orchard gamma_ct=0.1 baseline. The stable outcome is that gamma_ct=0.5 is dominated, gamma_ct=1.0 is best only if overall ranking is prioritized, and the older trigger_orchard scalar-head baseline remains the more balanced reference on the main 6->3 and 9->3 windows plus BStd.
-- Main blocker: There is still no trigger_orchard_v2 CT-vector setting that jointly improves ranking, calibration, and CT fit, and the branch still does not cleanly dominate the older scalar-head trigger_orchard baseline.
+- Updated: 2026-05-02T01:06:03+08:00
+- Current focus: trigger_orchard_v2 CT-vector branch comparison, including the raw-daily versus agro-daily input ablation
+- Latest outcome: After the gamma_ct scan, this session ran a matched 5-repeat trigger_orchard_v2 gamma_ct=0.1 ablation with raw 9-dim daily inputs instead of the 75-dim agro-expanded daily features. The raw-input branch slightly improved mean BStd and validation CT MAE, but it reduced mean window Ctd from about 0.655 to about 0.540, with the largest ranking loss on 9->1 and a smaller drop on 6->3, so the agro-expanded daily features remain the stronger default input for trigger_orchard_v2 when ranking matters.
+- Main blocker: There is still no trigger_orchard_v2 setting that jointly improves ranking, calibration, and CT fit; both the gamma_ct tradeoff and the raw-daily ablation suggest the branch can recover some calibration only by giving up too much discrimination.
