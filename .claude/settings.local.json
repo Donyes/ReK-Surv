@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python)",
+      "Bash(python -c ' *)",
+      "Bash(python train_dynamic.py --epochs 80 --n_folds 5 --patience 25 --batch_size 32)"
+    ]
+  }
+}
