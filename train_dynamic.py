@@ -28,6 +28,7 @@ from utils import (
     fit_ct_delta_preprocessor,
     fit_static_preprocessor,
     load_dynamic_hlb_dataset,
+    load_fixed_split_indices,
     split_tree_indices,
     transform_static_features,
     weighted_brier_score,
@@ -67,6 +68,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--test_size", type=float, default=0.2, help="Tree-level test split fraction")
     parser.add_argument("--val_ratio", type=float, default=0.2, help="Validation split fraction within train")
     parser.add_argument("--seed", type=int, default=42, help="Base random seed")
+    parser.add_argument(
+        "--fixed_split_json",
+        type=str,
+        default=None,
+        help="Optional JSON file with fixed train/val/test tree assignments to keep repeat splits stable across label edits.",
+    )
     parser.add_argument("--use_time_features", action="store_true", help="Append explicit time-position features for legacy mode")
     parser.add_argument("--use_ct_aux_task", action="store_true", help="Use Sheet4 CT values as an auxiliary supervision task only")
     parser.add_argument("--use_agro_features", action="store_true", help="Use agricultural multiscale environment features instead of the legacy raw daily features")
@@ -511,12 +518,19 @@ def run_repeat(
     repeat_seed = args.seed + repeat_index * 1000
     set_seed(repeat_seed)
 
-    train_indices, val_indices, test_indices = split_tree_indices(
-        tree_data=tree_data,
-        test_size=args.test_size,
-        val_ratio=args.val_ratio,
-        random_state=repeat_seed,
-    )
+    if args.fixed_split_json:
+        train_indices, val_indices, test_indices = load_fixed_split_indices(
+            tree_data=tree_data,
+            split_json_path=args.fixed_split_json,
+            repeat_index=repeat_index,
+        )
+    else:
+        train_indices, val_indices, test_indices = split_tree_indices(
+            tree_data=tree_data,
+            test_size=args.test_size,
+            val_ratio=args.val_ratio,
+            random_state=repeat_seed,
+        )
     preprocessor = fit_static_preprocessor(
         tree_data,
         train_indices,
@@ -725,6 +739,9 @@ def run_repeat(
         "train_trees": int(len(train_indices)),
         "val_trees": int(len(val_indices)),
         "test_trees": int(len(test_indices)),
+        "train_tree_ids": [str(tree_data.tree_ids[index]) for index in train_indices],
+        "val_tree_ids": [str(tree_data.tree_ids[index]) for index in val_indices],
+        "test_tree_ids": [str(tree_data.tree_ids[index]) for index in test_indices],
         "train_prefix_samples": int(len(train_samples)),
         "val_prefix_samples": int(len(val_samples)),
         "train_ct_aux_valid_n": count_ct_aux_valid_targets(train_samples),

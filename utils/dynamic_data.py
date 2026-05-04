@@ -4,9 +4,10 @@ Dynamic data utilities for HLB time-varying survival analysis.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Sequence
+from typing import Any, Dict, List, Sequence
 
 import numpy as np
 import pandas as pd
@@ -502,6 +503,64 @@ def split_tree_indices(
         np.sort(val_indices.astype(np.int64)),
         np.sort(test_indices.astype(np.int64)),
     )
+
+
+def _resolve_split_section(payload: dict[str, Any], repeat_index: int | None) -> dict[str, Any]:
+    if repeat_index is None or "repeat_splits" not in payload:
+        return payload
+    repeat_splits = payload["repeat_splits"]
+    repeat_key = str(int(repeat_index))
+    if repeat_key not in repeat_splits:
+        raise KeyError(f"Repeat {repeat_index} was not found in fixed split payload.")
+    merged = dict(payload)
+    merged.update(repeat_splits[repeat_key])
+    return merged
+
+
+def _resolve_split_indices(
+    tree_data: DynamicTreeData,
+    payload: dict[str, Any],
+    split_name: str,
+) -> np.ndarray:
+    indices_key = f"{split_name}_indices"
+    tree_ids_key = f"{split_name}_tree_ids"
+    if indices_key in payload:
+        indices = np.asarray(payload[indices_key], dtype=np.int64)
+        return np.sort(indices)
+    if tree_ids_key not in payload:
+        raise KeyError(f"Missing '{indices_key}' or '{tree_ids_key}' in fixed split payload.")
+
+    tree_lookup = {str(tree_id): idx for idx, tree_id in enumerate(tree_data.tree_ids)}
+    resolved_indices = []
+    missing_ids = []
+    for raw_tree_id in payload[tree_ids_key]:
+        tree_id = str(raw_tree_id)
+        if tree_id not in tree_lookup:
+            missing_ids.append(tree_id)
+            continue
+        resolved_indices.append(tree_lookup[tree_id])
+    if missing_ids:
+        raise KeyError(f"Fixed split references unknown tree IDs for {split_name}: {missing_ids}")
+    return np.sort(np.asarray(resolved_indices, dtype=np.int64))
+
+
+def load_fixed_split_indices(
+    tree_data: DynamicTreeData,
+    split_json_path: str | Path,
+    repeat_index: int | None = None,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    payload = json.loads(Path(split_json_path).read_text(encoding="utf-8"))
+    effective_payload = _resolve_split_section(payload, repeat_index)
+
+    train_indices = _resolve_split_indices(tree_data, effective_payload, "train")
+    val_indices = _resolve_split_indices(tree_data, effective_payload, "val")
+    test_indices = _resolve_split_indices(tree_data, effective_payload, "test")
+
+    combined = np.concatenate([train_indices, val_indices, test_indices])
+    unique_indices = np.unique(combined)
+    if len(unique_indices) != len(combined):
+        raise ValueError("Fixed split contains duplicate tree assignments across train/val/test.")
+    return train_indices, val_indices, test_indices
 
 
 def build_prefix_samples(

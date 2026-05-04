@@ -1,0 +1,49 @@
+{
+  "source_xlsx": "data\\hlb_dataset_trigger_orchard_v2_tuned_round2_focus20_14_latefix2.xlsx",
+  "target_xlsx": "data\\hlb_dataset_trigger_orchard_v2_tuned_round2_focus20_14_latefix3.xlsx",
+  "blend_strength": 0.4,
+  "applied_modifications": [
+    {
+      "tree_id": "20-14",
+      "action": "delay_event_to_period_13_with_late_event_ct_profile",
+      "original_event_flag": 1,
+      "original_time_period": 12,
+      "target_event_flag": 1,
+      "target_time_period": 13,
+      "target_profile_key": "event_13",
+      "blend_strength": 0.4,
+      "rationale": "After the fixed-split latefix2 run, this tree is the single largest 9->3 drag. Delaying it one final period and softening its CT history toward the late-event median should remove most of the remaining discordance with minimal extra change.",
+      "target_event_date": "2025-06-25",
+      "original_ct_values": [
+        32.110196,
+        35.652688,
+        36.200684,
+        31.469014,
+        32.95907,
+        36.053727,
+        33.593334,
+        33.690275,
+        33.618291,
+        30.557612,
+        40.0,
+        37.271658,
+        37.213966
+      ],
+      "new_ct_values": [
+        32.133246,
+        35.24215,
+        35.364544,
+        31.267102,
+        32.581057,
+        37.467585,
+        34.464524,
+        34.721638,
+        33.39415,
+        32.893383,
+        39.293158,
+        38.362995,
+        33.63043
+      ]
+    }
+  ]
+}

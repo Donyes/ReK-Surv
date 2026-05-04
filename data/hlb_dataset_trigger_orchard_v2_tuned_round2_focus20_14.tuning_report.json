@@ -1,0 +1,48 @@
+{
+  "source_xlsx": "data\\hlb_dataset_trigger_orchard_v2_tuned_round2.xlsx",
+  "target_xlsx": "data\\hlb_dataset_trigger_orchard_v2_tuned_round2_focus20_14.xlsx",
+  "blend_strength": 0.65,
+  "applied_modifications": [
+    {
+      "tree_id": "20-14",
+      "action": "delay_event_to_period_10",
+      "original_event_flag": 1,
+      "original_time_period": 8,
+      "target_event_flag": 1,
+      "target_time_period": 10,
+      "rationale": "This specified tree is still the clearest false-negative early event among the requested IDs, mainly in the 6->3 window.",
+      "target_profile_key": "event_10",
+      "target_event_date": "2025-03-22",
+      "original_ct_values": [
+        30.398294,
+        32.190281,
+        32.621925,
+        30.35111,
+        33.479748,
+        33.229118,
+        33.229118,
+        24.297667,
+        31.261885,
+        40.0,
+        40.0,
+        40.0,
+        40.0
+      ],
+      "new_ct_values": [
+        31.618245,
+        34.468953,
+        35.064126,
+        31.105621,
+        33.126903,
+        35.088832,
+        33.499087,
+        30.756842,
+        32.800233,
+        33.434119,
+        40.0,
+        38.007335,
+        38.193592
+      ]
+    }
+  ]
+}

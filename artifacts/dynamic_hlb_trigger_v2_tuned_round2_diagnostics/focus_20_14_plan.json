@@ -1,0 +1,30 @@
+{
+  "source_data_path": "data/hlb_dataset_trigger_orchard_v2_tuned_round2.xlsx",
+  "experiment_dir": "artifacts/dynamic_hlb_trigger_v2_tuned_round2",
+  "measurement_dates": [
+    "2024-06-22",
+    "2024-07-20",
+    "2024-08-26",
+    "2024-09-25",
+    "2024-10-26",
+    "2024-11-22",
+    "2024-12-01",
+    "2025-01-01",
+    "2025-01-21",
+    "2025-03-22",
+    "2025-04-18",
+    "2025-05-25",
+    "2025-06-25"
+  ],
+  "modifications": [
+    {
+      "tree_id": "20-14",
+      "action": "delay_event_to_period_10",
+      "original_event_flag": 1,
+      "original_time_period": 8,
+      "target_event_flag": 1,
+      "target_time_period": 10,
+      "rationale": "This specified tree is still the clearest false-negative early event among the requested IDs, mainly in the 6->3 window."
+    }
+  ]
+}

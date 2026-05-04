@@ -1,6 +1,5 @@
 # Next Steps
 
-- Compare trigger_orchard_v2 gamma_ct=1.0 against the scalar-head trigger_orchard baseline using a detach or gating design for the CT branch.
-- Keep the agro-expanded daily features as the default trigger_orchard_v2 input, and use the raw-daily version only as a calibration-oriented control ablation.
-- If calibration is prioritized instead, keep gamma_ct=0.1 and stop increasing raw CT loss weight further.
-- Decide whether the paper should keep trigger_orchard as the stronger balanced trigger baseline or continue investing in trigger_orchard_v2 as a ranking-first branch.
+- Run shared-split harmful-sample attribution for windows 4:3, 4:4, and 8:4, then propose the smallest joint Sheet2+Sheet4 edits that directly target those weak windows.
+- Decide whether future dataset edits should be judged primarily by mean Ctd or by calibration and repeat stability before making another retuning pass.
+- If the paper window set is being finalized now, start from the strict rows in artifacts/recommended_eval_windows_latefix3.csv and rerun the main model families under artifacts/dynamic_hlb_trigger_v2_windowset_shared_splits_seed42.json.

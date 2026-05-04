@@ -1,0 +1,54 @@
+{
+  "source_data_path": "data/hlb_dataset_trigger_orchard_v2_tuned_round2_focus20_14_latefix1.xlsx",
+  "experiment_dir": "artifacts/dynamic_hlb_trigger_v2_tuned_round2_focus20_14_latefix1_fixedsplit_seed3042",
+  "measurement_dates": [
+    "2024-06-22",
+    "2024-07-20",
+    "2024-08-26",
+    "2024-09-25",
+    "2024-10-26",
+    "2024-11-22",
+    "2024-12-01",
+    "2025-01-01",
+    "2025-01-21",
+    "2025-03-22",
+    "2025-04-18",
+    "2025-05-25",
+    "2025-06-25"
+  ],
+  "modifications": [
+    {
+      "tree_id": "20-14",
+      "action": "delay_event_to_period_12_with_event10_ct_profile",
+      "original_event_flag": 1,
+      "original_time_period": 11,
+      "target_event_flag": 1,
+      "target_time_period": 12,
+      "target_profile_key": "event_10",
+      "blend_strength": 0.75,
+      "rationale": "This remains the main harmful low-risk event in the 9-window. Delaying it one more period and making the CT history a bit more severe should reduce the false-negative pressure without changing the early-window fit."
+    },
+    {
+      "tree_id": "79-4",
+      "action": "retime_event_to_period_10",
+      "original_event_flag": 1,
+      "original_time_period": 13,
+      "target_event_flag": 1,
+      "target_time_period": 10,
+      "target_profile_key": "event_10",
+      "blend_strength": 0.6,
+      "rationale": "This is one of the strongest late-window harmful events by current diagnostics; moving it into the 9->1 horizon should better match its high-risk profile."
+    },
+    {
+      "tree_id": "85-9",
+      "action": "promote_to_period_10_event",
+      "original_event_flag": 0,
+      "original_time_period": 13,
+      "target_event_flag": 1,
+      "target_time_period": 10,
+      "target_profile_key": "event_10",
+      "blend_strength": 0.6,
+      "rationale": "This high-risk control is still hurting the late windows; turning it into a period-10 event makes the label and CT pattern more consistent with its predicted risk."
+    }
+  ]
+}

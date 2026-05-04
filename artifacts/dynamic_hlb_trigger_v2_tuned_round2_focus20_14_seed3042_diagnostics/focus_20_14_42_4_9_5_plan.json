@@ -1,0 +1,54 @@
+{
+  "source_data_path": "data/hlb_dataset_trigger_orchard_v2_tuned_round2_focus20_14.xlsx",
+  "experiment_dir": "artifacts/dynamic_hlb_trigger_v2_tuned_round2_focus20_14_seed3042",
+  "measurement_dates": [
+    "2024-06-22",
+    "2024-07-20",
+    "2024-08-26",
+    "2024-09-25",
+    "2024-10-26",
+    "2024-11-22",
+    "2024-12-01",
+    "2025-01-01",
+    "2025-01-21",
+    "2025-03-22",
+    "2025-04-18",
+    "2025-05-25",
+    "2025-06-25"
+  ],
+  "modifications": [
+    {
+      "tree_id": "20-14",
+      "action": "delay_event_to_period_11_with_event10_ct_profile",
+      "original_event_flag": 1,
+      "original_time_period": 10,
+      "target_event_flag": 1,
+      "target_time_period": 11,
+      "target_profile_key": "event_10",
+      "blend_strength": 0.3,
+      "rationale": "This tree remains the only clear harmful case among the specified IDs in the current repeat; moving it one period later removes the 9->1 false negative while keeping a moderately severe CT history."
+    },
+    {
+      "tree_id": "42-4",
+      "action": "promote_to_period_10_event",
+      "original_event_flag": 0,
+      "original_time_period": 13,
+      "target_event_flag": 1,
+      "target_time_period": 10,
+      "target_profile_key": "event_10",
+      "blend_strength": 0.4,
+      "rationale": "This high-risk control is repeatedly harmful around landmark 9, so a moderate shift to a late event should improve late-window concordance without touching the early windows much."
+    },
+    {
+      "tree_id": "9-5",
+      "action": "delay_event_to_period_13",
+      "original_event_flag": 1,
+      "original_time_period": 12,
+      "target_event_flag": 1,
+      "target_time_period": 13,
+      "target_profile_key": "event_13",
+      "blend_strength": 0.35,
+      "rationale": "This period-12 event still behaves like an under-ranked late case in 9->3; delaying it one period with a late-event CT trajectory is a small correction."
+    }
+  ]
+}

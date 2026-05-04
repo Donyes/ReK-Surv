@@ -1,0 +1,144 @@
+{
+  "input_xlsx": "data\\hlb_dataset.xlsx",
+  "sheet_name": "Sheet2",
+  "row_count": 123,
+  "feature_columns": [
+    "树龄",
+    "树势",
+    "东西冠幅",
+    "南北冠幅",
+    "树干高",
+    "树高",
+    "品种",
+    "周围是否有病树"
+  ],
+  "preprocessing": {
+    "numeric_columns_scaled": [
+      "树龄",
+      "树势",
+      "东西冠幅",
+      "南北冠幅",
+      "树干高",
+      "树高",
+      "周围是否有病树"
+    ],
+    "categorical_columns_one_hot": [
+      "品种"
+    ]
+  },
+  "tested_k_values": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "sse": [
+    881.569105691057,
+    491.6439587431357,
+    388.05157043414073,
+    319.69781163143875,
+    282.2733047385441,
+    255.29385538091165,
+    232.05076925685844,
+    214.3147948491822,
+    200.16289790475003,
+    192.32459504784808
+  ],
+  "elbow_distances": [
+    0.0,
+    4.091206211087974,
+    4.4438622848042,
+    4.336419472847083,
+    3.825143863253183,
+    3.177490664629896,
+    2.4810530330043634,
+    1.7127109034036432,
+    0.8975726846783164,
+    0.0
+  ],
+  "selected_k": 3,
+  "cluster_counts": {
+    "1": 59,
+    "2": 27,
+    "3": 37
+  },
+  "pca_explained_variance_ratio": {
+    "pca1": 0.5980995331748966,
+    "pca2": 0.1444225157227298,
+    "total": 0.7425220488976264
+  },
+  "nested_cluster_disease_summary": [
+    {
+      "一级聚类类别": 1,
+      "子聚类类别": 1,
+      "二级聚类标签": "1-1",
+      "样本数": 41,
+      "未发病数量": 8,
+      "发病数量": 33,
+      "发病率": 0.8049
+    },
+    {
+      "一级聚类类别": 1,
+      "子聚类类别": 2,
+      "二级聚类标签": "1-2",
+      "样本数": 18,
+      "未发病数量": 7,
+      "发病数量": 11,
+      "发病率": 0.6111
+    },
+    {
+      "一级聚类类别": 2,
+      "子聚类类别": 1,
+      "二级聚类标签": "2-1",
+      "样本数": 16,
+      "未发病数量": 3,
+      "发病数量": 13,
+      "发病率": 0.8125
+    },
+    {
+      "一级聚类类别": 2,
+      "子聚类类别": 2,
+      "二级聚类标签": "2-2",
+      "样本数": 11,
+      "未发病数量": 8,
+      "发病数量": 3,
+      "发病率": 0.2727
+    },
+    {
+      "一级聚类类别": 3,
+      "子聚类类别": 1,
+      "二级聚类标签": "3-1",
+      "样本数": 28,
+      "未发病数量": 13,
+      "发病数量": 15,
+      "发病率": 0.5357
+    },
+    {
+      "一级聚类类别": 3,
+      "子聚类类别": 2,
+      "二级聚类标签": "3-2",
+      "样本数": 9,
+      "未发病数量": 3,
+      "发病数量": 6,
+      "发病率": 0.6667
+    }
+  ],
+  "secondary_scatter_plots": [
+    "artifacts\\kmeans_sheet2\\sheet2_secondary_scatter_primary_1.png",
+    "artifacts\\kmeans_sheet2\\sheet2_secondary_scatter_primary_2.png",
+    "artifacts\\kmeans_sheet2\\sheet2_secondary_scatter_primary_3.png"
+  ],
+  "secondary_pca_plots": [
+    "artifacts\\kmeans_sheet2\\sheet2_secondary_pca_primary_1.png",
+    "artifacts\\kmeans_sheet2\\sheet2_secondary_pca_primary_2.png",
+    "artifacts\\kmeans_sheet2\\sheet2_secondary_pca_primary_3.png"
+  ],
+  "orchard_coordinate_rule": "编号 is parsed as x-y, where x is the left side and y is the right side of '-'.",
+  "random_state": 42
+}

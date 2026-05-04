@@ -1,0 +1,57 @@
+{
+  "source_data_path": "data\\hlb_dataset_trigger_orchard_v2_tuned_round2_focus20_14_latefix3.xlsx",
+  "experiment_dir": "artifacts\\dynamic_hlb_trigger_v2_tuned_round2_focus20_14_latefix3_fixedsplit_seed3042",
+  "measurement_dates": [
+    "2024-06-22",
+    "2024-07-20",
+    "2024-08-26",
+    "2024-09-25",
+    "2024-10-26",
+    "2024-11-22",
+    "2024-12-01",
+    "2025-01-01",
+    "2025-01-21",
+    "2025-03-22",
+    "2025-04-18",
+    "2025-05-25",
+    "2025-06-25"
+  ],
+  "modifications": [
+    {
+      "tree_id": "45-10",
+      "action": "delay_event",
+      "original_event_flag": 1,
+      "original_time_period": 7,
+      "target_event_flag": 1,
+      "target_time_period": 10,
+      "ctd_gain_sum": 0.23076923076923084,
+      "ctd_gain_max": 0.11538461538461542,
+      "mean_risk_percentile": 0.7333333333333333,
+      "rationale": "Low-risk observed event repeatedly hurts concordance; move onset later to match predicted low risk."
+    },
+    {
+      "tree_id": "42-4",
+      "action": "delay_event",
+      "original_event_flag": 1,
+      "original_time_period": 10,
+      "target_event_flag": 1,
+      "target_time_period": 11,
+      "ctd_gain_sum": 0.096551724137931,
+      "ctd_gain_max": 0.033333333333333326,
+      "mean_risk_percentile": 0.8205128205128205,
+      "rationale": "Low-risk observed event repeatedly hurts concordance; move onset later to match predicted low risk."
+    },
+    {
+      "tree_id": "78-8",
+      "action": "promote_event",
+      "original_event_flag": 0,
+      "original_time_period": 13,
+      "target_event_flag": 1,
+      "target_time_period": 12,
+      "ctd_gain_sum": 0.08809523809523812,
+      "ctd_gain_max": 0.07399267399267395,
+      "mean_risk_percentile": 0.7589743589743589,
+      "rationale": "High-risk control repeatedly hurts concordance; convert to an event period that matches predicted high risk."
+    }
+  ]
+}

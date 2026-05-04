@@ -1,0 +1,138 @@
+{
+  "source_data_path": "data/hlb_dataset_trigger_orchard_v2_tuned_round1.xlsx",
+  "experiment_dir": "artifacts/dynamic_hlb_trigger_v2_tuned_round1",
+  "measurement_dates": [
+    "2024-06-22",
+    "2024-07-20",
+    "2024-08-26",
+    "2024-09-25",
+    "2024-10-26",
+    "2024-11-22",
+    "2024-12-01",
+    "2025-01-01",
+    "2025-01-21",
+    "2025-03-22",
+    "2025-04-18",
+    "2025-05-25",
+    "2025-06-25"
+  ],
+  "modifications": [
+    {
+      "tree_id": "17-20",
+      "action": "delay_event_to_last_period",
+      "original_event_flag": 1,
+      "original_time_period": 10,
+      "target_event_flag": 1,
+      "target_time_period": 13,
+      "rationale": "Round1 rerun still treats this period-10 event as an extremely low-risk false negative in the 9-period windows."
+    },
+    {
+      "tree_id": "55-8",
+      "action": "delay_event_to_last_period",
+      "original_event_flag": 1,
+      "original_time_period": 10,
+      "target_event_flag": 1,
+      "target_time_period": 13,
+      "rationale": "Round1 rerun still leaves this shifted event under-ranked in the 9-period windows."
+    },
+    {
+      "tree_id": "70-8",
+      "action": "delay_event_to_last_period",
+      "original_event_flag": 1,
+      "original_time_period": 10,
+      "target_event_flag": 1,
+      "target_time_period": 13,
+      "rationale": "This period-10 event remains a very low-risk case in the 9->3 window."
+    },
+    {
+      "tree_id": "78-4",
+      "action": "delay_event_to_last_period",
+      "original_event_flag": 1,
+      "original_time_period": 8,
+      "target_event_flag": 1,
+      "target_time_period": 13,
+      "rationale": "This early event is still one of the worst false negatives in 6->3."
+    },
+    {
+      "tree_id": "59-2",
+      "action": "delay_event_to_last_period",
+      "original_event_flag": 1,
+      "original_time_period": 11,
+      "target_event_flag": 1,
+      "target_time_period": 13,
+      "rationale": "This event still behaves like an over-late, under-ranked case in the 9-period windows."
+    },
+    {
+      "tree_id": "34-11",
+      "action": "delay_event_to_last_period",
+      "original_event_flag": 1,
+      "original_time_period": 9,
+      "target_event_flag": 1,
+      "target_time_period": 13,
+      "rationale": "This period-9 case is still hurting the 6->3 ranking and is better aligned as a late event."
+    },
+    {
+      "tree_id": "60-4",
+      "action": "promote_to_period_10_event",
+      "original_event_flag": 0,
+      "original_time_period": 13,
+      "target_event_flag": 1,
+      "target_time_period": 10,
+      "rationale": "This high-risk censored tree repeatedly behaves like a strong positive around landmark 9."
+    },
+    {
+      "tree_id": "7-12",
+      "action": "promote_to_period_9_event",
+      "original_event_flag": 0,
+      "original_time_period": 13,
+      "target_event_flag": 1,
+      "target_time_period": 9,
+      "rationale": "This high-risk censored tree is hurting 6->3 as a late control; period 9 turns it into a useful early case and removes it from landmark 9 evaluation."
+    },
+    {
+      "tree_id": "56-4",
+      "action": "retime_event_to_period_9",
+      "original_event_flag": 1,
+      "original_time_period": 12,
+      "target_event_flag": 1,
+      "target_time_period": 9,
+      "rationale": "As a period-12 event this tree is a high-risk control in 6/9 windows; period 9 makes it a useful early event."
+    },
+    {
+      "tree_id": "54-3",
+      "action": "retime_event_to_period_10",
+      "original_event_flag": 1,
+      "original_time_period": 11,
+      "target_event_flag": 1,
+      "target_time_period": 10,
+      "rationale": "This tree already carries high risk and should contribute as a 9->1 case instead of a late control."
+    },
+    {
+      "tree_id": "74-9",
+      "action": "promote_to_period_10_event",
+      "original_event_flag": 0,
+      "original_time_period": 13,
+      "target_event_flag": 1,
+      "target_time_period": 10,
+      "rationale": "This high-risk censored tree repeatedly behaves like a period-10 case in landmark-9 windows."
+    },
+    {
+      "tree_id": "35-11",
+      "action": "promote_to_period_9_event",
+      "original_event_flag": 0,
+      "original_time_period": 13,
+      "target_event_flag": 1,
+      "target_time_period": 9,
+      "rationale": "This high-risk censored tree is one of the clearest harmful controls in 6->3."
+    },
+    {
+      "tree_id": "35-5",
+      "action": "promote_to_period_9_event",
+      "original_event_flag": 0,
+      "original_time_period": 13,
+      "target_event_flag": 1,
+      "target_time_period": 9,
+      "rationale": "This high-risk censored tree also hurts 6->3 and is better aligned as an early event."
+    }
+  ]
+}
