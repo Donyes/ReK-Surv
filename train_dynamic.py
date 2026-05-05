@@ -77,6 +77,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--use_time_features", action="store_true", help="Append explicit time-position features for legacy mode")
     parser.add_argument("--use_ct_aux_task", action="store_true", help="Use Sheet4 CT values as an auxiliary supervision task only")
     parser.add_argument("--use_agro_features", action="store_true", help="Use agricultural multiscale environment features instead of the legacy raw daily features")
+    parser.add_argument(
+        "--env_feature_set",
+        type=str,
+        default="auto",
+        choices=["auto", "raw9", "agro75", "basic10"],
+        help="Daily environment feature construction scheme.",
+    )
+    parser.add_argument(
+        "--build_period_env",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Whether to construct period-level environment tensors.",
+    )
     parser.add_argument("--use_tree_id_spatial", action="store_true", help="Append parsed tree-row/tree-column coordinates as static features")
     parser.add_argument(
         "--period_feature_mode",
@@ -89,7 +102,7 @@ def parse_args() -> argparse.Namespace:
         "--model_type",
         type=str,
         default="legacy",
-        choices=["legacy", "legacy_period_mean", "period_ms", "period_ms_tree_query", "trigger_orchard", "trigger_orchard_v2"],
+        choices=["legacy", "legacy_period_mean", "period_ms", "period_ms_tree_query", "trigger_orchard", "trigger_orchard_v2", "trigger_orchard_v3"],
         help="Dynamic model architecture",
     )
     parser.add_argument("--rnn_type", type=str, default="gru", choices=["gru", "lstm"], help="Sequence encoder type for the legacy model")
@@ -123,6 +136,7 @@ def parse_args() -> argparse.Namespace:
         help="Optional restriction on which landmark prefixes are used for training/validation, e.g. 6 or 6 9.",
     )
     args = parser.parse_args()
+    args.model_type = str(args.model_type).strip().lower()
 
     if args.gamma is not None:
         args.gamma_env = args.gamma
@@ -132,7 +146,17 @@ def parse_args() -> argparse.Namespace:
         args.gamma_env = 0.0
     if args.model_type != "legacy":
         args.use_time_features = False
+    configure_model_data_settings(args)
     return args
+
+
+def configure_model_data_settings(args: argparse.Namespace) -> None:
+    args.env_feature_set = str(getattr(args, "env_feature_set", "auto")).strip().lower()
+    args.build_period_env = bool(getattr(args, "build_period_env", True))
+    if args.model_type == "trigger_orchard_v3":
+        args.env_feature_set = "basic10"
+        args.build_period_env = False
+        args.period_feature_mode = "none"
 
 
 def build_window_specs(landmarks: Sequence[int], pred_horizons: Sequence[int], num_periods: int) -> List[Tuple[int, int]]:
@@ -176,7 +200,9 @@ def build_explicit_window_specs(window_pairs: Sequence[str], num_periods: int) -
 
 def configure_ct_aux_target(args: argparse.Namespace, window_specs: Sequence[Tuple[int, int]]) -> None:
     model_type = str(args.model_type).strip().lower()
-    use_vector_target = bool(args.use_ct_aux_task and model_type == "trigger_orchard_v2")
+    use_vector_target = bool(
+        args.use_ct_aux_task and model_type in {"trigger_orchard_v2", "trigger_orchard_v3"}
+    )
     if not use_vector_target:
         args.ct_aux_target_mode = "disabled" if not args.use_ct_aux_task else "next_delta"
         args.ct_delta_output_dim = 1
@@ -750,6 +776,8 @@ def run_repeat(
         "best_val_mean_ctd": float(best_val_ctd),
         "model_type": args.model_type,
         "use_agro_features": bool(args.use_agro_features),
+        "env_feature_set": args.env_feature_set,
+        "build_period_env": bool(args.build_period_env),
         "use_tree_id_spatial": bool(args.use_tree_id_spatial),
         "ct_aux_enabled": bool(args.use_ct_aux_task),
         "ct_aux_target_mode": getattr(
@@ -870,6 +898,8 @@ def main() -> None:
         args.data_path,
         use_ct_aux_task=args.use_ct_aux_task,
         use_agro_features=args.use_agro_features,
+        env_feature_set=args.env_feature_set,
+        build_period_env=args.build_period_env,
         period_feature_mode=args.period_feature_mode,
     )
     if args.window_pairs:
@@ -890,6 +920,7 @@ def main() -> None:
     print(f"Early-stop windows: {early_stop_window_specs}")
     print(
         f"Model type: {args.model_type} | Agro features: {args.use_agro_features} "
+        f"| Env feature set: {args.env_feature_set} | Build period env: {args.build_period_env} "
         f"| Period features: {args.period_feature_mode} | Env aux: {args.env_aux_mode} "
         f"| Tree spatial: {args.use_tree_id_spatial}"
     )

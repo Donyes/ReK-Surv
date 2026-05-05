@@ -3,5 +3,5 @@
 - 方法演化关系：`period_ms` 是先提出的时期级多尺度农业环境建模框架；`period_ms_tree_query` 是在 `period_ms` 上加入树特异性时期注意力后的增强版，不是独立替代路线。
 - 数据集：`data/hlb_dataset.xlsx`。
 - 当前评估协议：tree-level repeated random hold-out（5 次 repeat），不是 `k-fold CV`；风险输出按时期而不是按天。
-- 当前研究焦点：在保持时期级建模和 landmark prefix expansion 的前提下，比较 `period_ms`、`period_ms_tree_query` 与外部基线（尤其是 Dynamic-DeepHit），并整理论文/组会叙事。
-- 当前关键风险：不同窗口组合上的稳定性仍需继续核实；`tree-specific attention` 已经存在，但其收益是否在更广窗口和外部基线上持续成立，仍需要实验支撑。
+- 当前研究焦点：在固定共享 split 和明确窗口组的前提下，同时推进两条线：一条是 `period_ms_tree_query` 与外部基线的主线比较；另一条是 `trigger_orchard_v2/v3` 的输入简化、窗口集复现和 CT 辅助任务消融，用于形成更容易回答审稿人问题的动态建模叙事。
+- 当前关键风险：目前仍没有一个变体在原始版与 tuned 版数据集上同时稳定主导 ranking（Ctd）和 calibration（Brier）；论文主线需要先明确以哪个指标为主，以及 `trigger_orchard` 路线是否以 `v3+CT`、`v3-noCT` 或仅作为简化对照呈现。

@@ -2508,6 +2508,8 @@ def main() -> None:
         data_path=args.data_path,
         use_ct_aux_task=bool(artifact_config.get("use_ct_aux_task", False)),
         use_agro_features=bool(artifact_config.get("use_agro_features", False)),
+        env_feature_set=str(artifact_config.get("env_feature_set", "auto")),
+        build_period_env=bool(artifact_config.get("build_period_env", True)),
         period_feature_mode=str(artifact_config.get("period_feature_mode", "full")),
     )
     window_specs = build_window_specs(args.window_pairs, tree_data.num_periods)

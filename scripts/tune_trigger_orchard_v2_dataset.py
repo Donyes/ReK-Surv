@@ -85,6 +85,8 @@ def load_experiment_bundle(experiment_dir: Path) -> ExperimentBundle:
         config["data_path"],
         use_ct_aux_task=config["use_ct_aux_task"],
         use_agro_features=config["use_agro_features"],
+        env_feature_set=str(config.get("env_feature_set", "auto")),
+        build_period_env=bool(config.get("build_period_env", True)),
         period_feature_mode=config["period_feature_mode"],
     )
     args = Namespace(**config)

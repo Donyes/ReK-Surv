@@ -1,0 +1,155 @@
+{
+  "config": {
+    "data_path": "data/hlb_dataset.xlsx",
+    "landmarks": [
+      6,
+      9
+    ],
+    "pred_horizons": [
+      1,
+      3
+    ],
+    "window_pairs": [
+      "4:3",
+      "4:5",
+      "6:3",
+      "6:5",
+      "8:3",
+      "8:5"
+    ],
+    "early_stop_window_pairs": null,
+    "repeats": 1,
+    "test_size": 0.2,
+    "val_ratio": 0.2,
+    "seed": 42,
+    "fixed_split_json": "artifacts/dynamic_hlb_trigger_v2_windowset_shared_splits_seed42.json",
+    "use_time_features": false,
+    "use_ct_aux_task": true,
+    "use_agro_features": true,
+    "env_feature_set": "basic10",
+    "build_period_env": false,
+    "use_tree_id_spatial": false,
+    "period_feature_mode": "none",
+    "model_type": "trigger_orchard_v3",
+    "rnn_type": "gru",
+    "env_aux_mode": "none",
+    "epochs": 2,
+    "patience": 2,
+    "lr": 0.001,
+    "batch_size": 16,
+    "alpha": 1.0,
+    "beta": 0.2,
+    "gamma": null,
+    "gamma_env": 0.0,
+    "gamma_ct": 0.1,
+    "ct_aux_loss": "huber",
+    "lag_spread_weight": 0.01,
+    "tree_attention_dropout": 0.1,
+    "static_attention_dim": 32,
+    "weight_decay": 0.0001,
+    "output_dir": "artifacts/_smoke_trigger_v3_orig",
+    "train_landmark_subset": null,
+    "ct_aux_target_mode": "window_prefix_vector",
+    "ct_delta_output_dim": 12,
+    "ct_aux_window_specs": [
+      [
+        4,
+        3
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        6,
+        3
+      ],
+      [
+        6,
+        5
+      ],
+      [
+        8,
+        3
+      ],
+      [
+        8,
+        5
+      ]
+    ]
+  },
+  "windows": [
+    {
+      "landmark": 4,
+      "pred_horizon": 3,
+      "eligible_n_mean": 15.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 2.0,
+      "future_event_n_std": 0.0,
+      "ctd_mean": 0.4074074074074074,
+      "ctd_std": 0.0,
+      "bstd_mean": 0.12965293762073357,
+      "bstd_std": 0.0
+    },
+    {
+      "landmark": 4,
+      "pred_horizon": 5,
+      "eligible_n_mean": 15.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 4.0,
+      "future_event_n_std": 0.0,
+      "ctd_mean": 0.42857142857142855,
+      "ctd_std": 0.0,
+      "bstd_mean": 0.21176188350362146,
+      "bstd_std": 0.0
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 3,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 3.0,
+      "future_event_n_std": 0.0,
+      "ctd_mean": 0.2857142857142857,
+      "ctd_std": 0.0,
+      "bstd_mean": 0.17506446594693784,
+      "bstd_std": 0.0
+    },
+    {
+      "landmark": 6,
+      "pred_horizon": 5,
+      "eligible_n_mean": 14.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 5.0,
+      "future_event_n_std": 0.0,
+      "ctd_mean": 0.3018867924528302,
+      "ctd_std": 0.0,
+      "bstd_mean": 0.2485222333682751,
+      "bstd_std": 0.0
+    },
+    {
+      "landmark": 8,
+      "pred_horizon": 3,
+      "eligible_n_mean": 11.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 2.0,
+      "future_event_n_std": 0.0,
+      "ctd_mean": 0.2222222222222222,
+      "ctd_std": 0.0,
+      "bstd_mean": 0.1652049133501556,
+      "bstd_std": 0.0
+    },
+    {
+      "landmark": 8,
+      "pred_horizon": 5,
+      "eligible_n_mean": 11.0,
+      "eligible_n_std": 0.0,
+      "future_event_n_mean": 2.0,
+      "future_event_n_std": 0.0,
+      "ctd_mean": 0.2222222222222222,
+      "ctd_std": 0.0,
+      "bstd_mean": 0.11127259379603531,
+      "bstd_std": 0.0
+    }
+  ]
+}

@@ -31,6 +31,7 @@ class DynamicReKSurv(nn.Module):
     - period_ms_tree_query: tree-specific period attention conditioned on static features
     - trigger_orchard: daily multiscale trigger-window search
     - trigger_orchard_v2: tree-conditioned continuous-window trigger search
+    - trigger_orchard_v3: trigger_orchard_v2 with simplified 10-d daily inputs and no period env
     """
 
     def __init__(
@@ -140,7 +141,7 @@ class DynamicReKSurv(nn.Module):
                 grid_size=grid_size,
                 spline_order=spline_order,
             )
-        elif self.model_type == "trigger_orchard_v2":
+        elif self.model_type in {"trigger_orchard_v2", "trigger_orchard_v3"}:
             self._init_trigger_orchard_v2(
                 projection_dim=projection_dim,
                 hidden_size=hidden_size,
@@ -507,7 +508,7 @@ class DynamicReKSurv(nn.Module):
                 landmark_period=landmark_period,
                 period_observed_mask=period_observed_mask,
             )
-        if self.model_type == "trigger_orchard_v2":
+        if self.model_type in {"trigger_orchard_v2", "trigger_orchard_v3"}:
             return self._forward_trigger_orchard_v2(
                 daily_env_prefix=daily_env_prefix,
                 static_x=static_x,

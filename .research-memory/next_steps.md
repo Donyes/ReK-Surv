@@ -1,5 +1,5 @@
 # Next Steps
 
-- Run shared-split harmful-sample attribution for windows 4:3, 4:4, and 8:4, then propose the smallest joint Sheet2+Sheet4 edits that directly target those weak windows.
-- Decide whether future dataset edits should be judged primarily by mean Ctd or by calibration and repeat stability before making another retuning pass.
-- If the paper window set is being finalized now, start from the strict rows in artifacts/recommended_eval_windows_latefix3.csv and rerun the main model families under artifacts/dynamic_hlb_trigger_v2_windowset_shared_splits_seed42.json.
+- Build a paper-ready table comparing trigger_orchard_v2, trigger_orchard_v3, and trigger_orchard_v3-noCT on both datasets and the fixed window set.
+- Decide whether the trigger_orchard line should use CT auxiliary supervision based on whether mean Ctd or calibration is the primary paper metric.
+- If trigger_orchard remains in scope, compare the chosen v3 variant against period_ms_tree_query and external baselines on the same shared splits and fixed window set.

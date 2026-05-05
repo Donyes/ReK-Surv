@@ -1,6 +1,6 @@
 # Active Context
 
-- Updated: 2026-05-04T16:52:19+08:00
-- Current focus: Closed trigger_orchard_v2 dataset retuning and window-support analysis
-- Latest outcome: This session built a joint Sheet2+Sheet4 workbook-tuning workflow for trigger_orchard_v2, added fixed repeat-split support so label edits can be compared fairly, and produced a final tuned workbook plus a full legal-window support table. The stable outcome is that the tuned workbook can look excellent on one fixed repeat, but on shared or untied 5-repeat evaluation it improves calibration and stability more than it improves ranking, so further edits must optimize multi-repeat shared-split Ctd directly.
-- Main blocker: The tuned workbook is cleaner and more stable, but it still underperforms the original workbook on shared-split mean Ctd for windows 4->3, 4->4, and 8->4, so there is still no edited dataset that clearly dominates on both ranking and calibration.
+- Updated: 2026-05-05T21:23:54+08:00
+- Current focus: trigger_orchard_v3 simplification and CT ablation on fixed windows
+- Latest outcome: Implemented trigger_orchard_v3 with 10-d daily inputs and no period_env, then completed full5 shared-split comparisons on windows 4:3 4:5 6:3 6:5 8:3 8:5. Stable result: v3 beats v2 on the original dataset, is roughly tied on the tuned latefix3 dataset, and CT auxiliary supervision improves Ctd but not calibration.
+- Main blocker: No single trigger_orchard variant currently dominates both ranking and calibration across both datasets, so the next thread must decide whether the paper prioritizes mean Ctd or Brier/calibration.

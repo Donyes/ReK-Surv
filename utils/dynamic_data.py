@@ -29,7 +29,8 @@ RAW_ENV_COLUMN_MAP = {
     "土壤水分": "soil_moisture",
     "土壤EC值": "soil_ec",
 }
-PERIOD_STAT_FEATURES = [
+RAW9_ENV_FEATURES = list(RAW_ENV_COLUMN_MAP.values())
+AGRO_PERIOD_STAT_FEATURES = [
     "air_temp",
     "air_humidity",
     "light_intensity",
@@ -37,6 +38,18 @@ PERIOD_STAT_FEATURES = [
     "wind_cos",
     "wind_speed",
     "rainfall_log1p",
+    "soil_temp",
+    "soil_moisture",
+    "soil_ec",
+]
+BASIC10_ENV_FEATURES = [
+    "air_temp",
+    "air_humidity",
+    "light_intensity",
+    "wind_sin",
+    "wind_cos",
+    "wind_speed",
+    "rainfall",
     "soil_temp",
     "soil_moisture",
     "soil_ec",
@@ -116,6 +129,8 @@ class DynamicTreeData:
     max_days: int
     num_periods: int
     use_agro_features: bool
+    env_feature_set: str
+    build_period_env: bool
     period_feature_mode: str
     ct_values: np.ndarray | None = None
     ct_valid_mask: np.ndarray | None = None
@@ -186,6 +201,8 @@ def load_dynamic_hlb_dataset(
     baseline_date: str | pd.Timestamp = BASELINE_DATE,
     use_ct_aux_task: bool = False,
     use_agro_features: bool = False,
+    env_feature_set: str = "auto",
+    build_period_env: bool = True,
     period_feature_mode: str = "full",
 ) -> DynamicTreeData:
     """
@@ -217,6 +234,10 @@ def load_dynamic_hlb_dataset(
             f"Environment data is missing {len(missing_dates)} calendar days after baseline."
         )
 
+    resolved_env_feature_set = _resolve_env_feature_set(
+        use_agro_features=use_agro_features,
+        env_feature_set=env_feature_set,
+    )
     day_to_period = _build_day_to_period(expected_dates, period_end_dates)
     (
         daily_env_values,
@@ -229,7 +250,8 @@ def load_dynamic_hlb_dataset(
         env_window=env_window,
         expected_dates=expected_dates,
         period_end_dates=period_end_dates,
-        use_agro_features=use_agro_features,
+        env_feature_set=resolved_env_feature_set,
+        build_period_env=build_period_env,
         period_feature_mode=period_feature_mode,
     )
 
@@ -329,6 +351,8 @@ def load_dynamic_hlb_dataset(
         max_days=max_days,
         num_periods=num_periods,
         use_agro_features=use_agro_features,
+        env_feature_set=resolved_env_feature_set,
+        build_period_env=bool(build_period_env),
         period_feature_mode=period_feature_mode,
         ct_values=ct_values,
         ct_valid_mask=ct_valid_mask,
@@ -627,7 +651,8 @@ def _build_environment_features(
     env_window: pd.DataFrame,
     expected_dates: pd.DatetimeIndex,
     period_end_dates: Sequence[pd.Timestamp],
-    use_agro_features: bool,
+    env_feature_set: str,
+    build_period_env: bool,
     period_feature_mode: str,
 ) -> tuple[np.ndarray, List[str], np.ndarray, List[str], np.ndarray, np.ndarray]:
     renamed = env_window.rename(columns=RAW_ENV_COLUMN_MAP).copy()
@@ -635,9 +660,12 @@ def _build_environment_features(
     if len(raw_frame) != len(expected_dates):
         raise ValueError("Environment frame length does not match the expected daily calendar.")
 
-    if use_agro_features:
+    if env_feature_set == "agro75":
         daily_frame = _build_agro_daily_feature_frame(raw_frame)
-        period_base_features = PERIOD_STAT_FEATURES
+        period_base_features = AGRO_PERIOD_STAT_FEATURES
+    elif env_feature_set == "basic10":
+        daily_frame = _build_basic10_daily_feature_frame(raw_frame)
+        period_base_features = BASIC10_ENV_FEATURES
     else:
         daily_frame = raw_frame.copy()
         period_base_features = list(daily_frame.columns)
@@ -649,19 +677,27 @@ def _build_environment_features(
     standardized_daily_values = (daily_values - daily_mean) / daily_std
     standardized_daily_frame = pd.DataFrame(standardized_daily_values, columns=daily_frame.columns)
 
-    period_values, period_feature_names, start_indices, end_indices = _build_period_feature_matrix(
-        daily_frame=standardized_daily_frame,
+    start_indices, end_indices = _compute_period_day_indices(
         period_end_dates=period_end_dates,
         expected_dates=expected_dates,
-        base_feature_names=period_base_features,
-        period_feature_mode=period_feature_mode,
-        use_agro_features=use_agro_features,
     )
+    if build_period_env:
+        period_values, period_feature_names, _, _ = _build_period_feature_matrix(
+            daily_frame=standardized_daily_frame,
+            period_end_dates=period_end_dates,
+            expected_dates=expected_dates,
+            base_feature_names=period_base_features,
+            period_feature_mode=period_feature_mode,
+            env_feature_set=env_feature_set,
+        )
 
-    period_mean = period_values.mean(axis=0)
-    period_std = period_values.std(axis=0)
-    period_std[period_std == 0] = 1.0
-    standardized_period_values = (period_values - period_mean) / period_std
+        period_mean = period_values.mean(axis=0)
+        period_std = period_values.std(axis=0)
+        period_std[period_std == 0] = 1.0
+        standardized_period_values = (period_values - period_mean) / period_std
+    else:
+        standardized_period_values = np.zeros((len(period_end_dates), 0), dtype=np.float32)
+        period_feature_names = []
 
     return (
         standardized_daily_values.astype(np.float32),
@@ -671,6 +707,31 @@ def _build_environment_features(
         start_indices,
         end_indices,
     )
+
+
+def _resolve_env_feature_set(use_agro_features: bool, env_feature_set: str | None) -> str:
+    normalized = "auto" if env_feature_set is None else str(env_feature_set).strip().lower()
+    if normalized == "auto":
+        return "agro75" if use_agro_features else "raw9"
+    if normalized not in {"raw9", "agro75", "basic10"}:
+        raise ValueError(f"Unsupported env_feature_set: {env_feature_set}")
+    return normalized
+
+
+def _build_basic10_daily_feature_frame(raw_frame: pd.DataFrame) -> pd.DataFrame:
+    frame = pd.DataFrame(index=raw_frame.index)
+    wind_rad = np.deg2rad(raw_frame["wind_direction"].to_numpy(dtype=np.float64) % 360.0)
+    frame["air_temp"] = raw_frame["air_temp"].to_numpy(dtype=np.float64)
+    frame["air_humidity"] = raw_frame["air_humidity"].to_numpy(dtype=np.float64)
+    frame["light_intensity"] = raw_frame["light_intensity"].to_numpy(dtype=np.float64)
+    frame["wind_sin"] = np.sin(wind_rad)
+    frame["wind_cos"] = np.cos(wind_rad)
+    frame["wind_speed"] = raw_frame["wind_speed"].to_numpy(dtype=np.float64)
+    frame["rainfall"] = raw_frame["rainfall"].to_numpy(dtype=np.float64)
+    frame["soil_temp"] = raw_frame["soil_temp"].to_numpy(dtype=np.float64)
+    frame["soil_moisture"] = raw_frame["soil_moisture"].to_numpy(dtype=np.float64)
+    frame["soil_ec"] = raw_frame["soil_ec"].to_numpy(dtype=np.float64)
+    return frame.astype(np.float32)
 
 
 def _build_agro_daily_feature_frame(raw_frame: pd.DataFrame) -> pd.DataFrame:
@@ -735,13 +796,13 @@ def _build_period_feature_matrix(
     expected_dates: pd.DatetimeIndex,
     base_feature_names: Sequence[str],
     period_feature_mode: str,
-    use_agro_features: bool,
+    env_feature_set: str,
 ) -> tuple[np.ndarray, List[str], np.ndarray, np.ndarray]:
     period_feature_mode = str(period_feature_mode).strip().lower()
     if period_feature_mode not in {"full", "compact", "mean_only"}:
         raise ValueError(f"Unsupported period_feature_mode: {period_feature_mode}")
 
-    if period_feature_mode == "compact" and not use_agro_features:
+    if period_feature_mode == "compact" and env_feature_set != "agro75":
         raise ValueError("period_feature_mode=compact requires use_agro_features=True.")
 
     if period_feature_mode == "compact":
@@ -763,12 +824,14 @@ def _build_period_feature_matrix(
     start_indices: List[int] = []
     end_indices: List[int] = []
 
-    previous_end_index = -1
-    for period_index, period_end_date in enumerate(period_end_dates, start=1):
-        end_index = int((pd.Timestamp(period_end_date) - expected_dates[0]).days)
-        start_index = previous_end_index + 1
-        if end_index < start_index:
-            raise ValueError(f"Invalid period boundary at period {period_index}.")
+    start_indices_array, end_indices_array = _compute_period_day_indices(
+        period_end_dates=period_end_dates,
+        expected_dates=expected_dates,
+    )
+    for period_index, (start_index, end_index) in enumerate(
+        zip(start_indices_array.tolist(), end_indices_array.tolist()),
+        start=1,
+    ):
 
         period_slice = daily_frame.iloc[start_index : end_index + 1]
         row_values: List[float] = []
@@ -795,13 +858,33 @@ def _build_period_feature_matrix(
         if not period_feature_names:
             period_feature_names = row_names
         period_features.append(np.asarray(row_values, dtype=np.float32))
-        start_indices.append(start_index)
-        end_indices.append(end_index)
-        previous_end_index = end_index
+        start_indices.append(int(start_index))
+        end_indices.append(int(end_index))
 
     return (
         np.stack(period_features, axis=0).astype(np.float32),
         period_feature_names,
+        np.asarray(start_indices, dtype=np.int64),
+        np.asarray(end_indices, dtype=np.int64),
+    )
+
+
+def _compute_period_day_indices(
+    period_end_dates: Sequence[pd.Timestamp],
+    expected_dates: pd.DatetimeIndex,
+) -> tuple[np.ndarray, np.ndarray]:
+    start_indices: List[int] = []
+    end_indices: List[int] = []
+    previous_end_index = -1
+    for period_index, period_end_date in enumerate(period_end_dates, start=1):
+        end_index = int((pd.Timestamp(period_end_date) - expected_dates[0]).days)
+        start_index = previous_end_index + 1
+        if end_index < start_index:
+            raise ValueError(f"Invalid period boundary at period {period_index}.")
+        start_indices.append(start_index)
+        end_indices.append(end_index)
+        previous_end_index = end_index
+    return (
         np.asarray(start_indices, dtype=np.int64),
         np.asarray(end_indices, dtype=np.int64),
     )
