@@ -56,7 +56,10 @@ class DynamicReKSurv(nn.Module):
         trigger_topk: int = 5,
         tree_attention_dropout: float = 0.10,
         static_attention_dim: int = 32,
-        ct_delta_output_dim: int = 1,
+        ct_delta_output_dim: int | None = None,
+        ct_aux_output_dim: int | None = None,
+        ct_state_output_dim: int | None = None,
+        ct_aux_target_mode: str | None = None,
     ):
         super().__init__()
         self.env_dim = env_dim
@@ -67,7 +70,11 @@ class DynamicReKSurv(nn.Module):
         self.model_type = model_type.strip().lower()
         self.env_aux_mode = env_aux_mode.strip().lower()
         self.trigger_topk = int(trigger_topk)
-        self.ct_delta_output_dim = max(int(ct_delta_output_dim), 1)
+        self.ct_aux_target_mode = str(ct_aux_target_mode or "").strip().lower()
+        resolved_ct_output_dim = ct_aux_output_dim if ct_aux_output_dim is not None else ct_delta_output_dim
+        self.ct_aux_output_dim = max(int(resolved_ct_output_dim or 1), 1)
+        self.ct_delta_output_dim = max(int(ct_delta_output_dim or self.ct_aux_output_dim), 1)
+        self.ct_state_output_dim = max(int(ct_state_output_dim or self.ct_aux_output_dim), 1)
 
         day_to_period_tensor = torch.tensor(day_to_period, dtype=torch.long)
         max_days = int(day_to_period_tensor.numel())
@@ -148,7 +155,9 @@ class DynamicReKSurv(nn.Module):
                 landmark_embedding_dim=landmark_embedding_dim,
                 grid_size=grid_size,
                 spline_order=spline_order,
+                ct_aux_output_dim=self.ct_aux_output_dim,
                 ct_delta_output_dim=self.ct_delta_output_dim,
+                ct_state_output_dim=self.ct_state_output_dim,
             )
         else:
             raise ValueError(f"Unsupported model type: {model_type}")
@@ -372,7 +381,9 @@ class DynamicReKSurv(nn.Module):
         landmark_embedding_dim: int,
         grid_size: int,
         spline_order: int,
+        ct_aux_output_dim: int,
         ct_delta_output_dim: int,
+        ct_state_output_dim: int,
     ) -> None:
         kernel_sizes = [7, 14, 30, 60]
         branch_hidden = max(hidden_size // len(kernel_sizes), 8)
@@ -448,11 +459,41 @@ class DynamicReKSurv(nn.Module):
             grid_size=grid_size,
             spline_order=spline_order,
         )
-        self.trigger_ct_aux_head = nn.Sequential(
-            nn.Linear(self.fused_dim + landmark_embedding_dim, projection_dim),
-            nn.ReLU(),
-            nn.Linear(projection_dim, ct_delta_output_dim),
-        )
+        if self.model_type == "trigger_orchard_v3":
+            if self.ct_aux_target_mode == "window_endpoint_heads":
+                self.trigger_ct_state_head = nn.Sequential(
+                    nn.Linear(self.fused_dim + landmark_embedding_dim, projection_dim),
+                    nn.ReLU(),
+                    nn.Linear(projection_dim, ct_state_output_dim),
+                )
+                self.trigger_ct_value_head = nn.Sequential(
+                    nn.Linear(self.fused_dim + landmark_embedding_dim, projection_dim),
+                    nn.ReLU(),
+                    nn.Linear(projection_dim, ct_aux_output_dim),
+                )
+            elif self.ct_aux_target_mode == "window_prefix_vector_with_endpoint_lod":
+                self.trigger_ct_state_head = nn.Sequential(
+                    nn.Linear(self.fused_dim + landmark_embedding_dim, projection_dim),
+                    nn.ReLU(),
+                    nn.Linear(projection_dim, ct_state_output_dim),
+                )
+                self.trigger_ct_delta_head = nn.Sequential(
+                    nn.Linear(self.fused_dim + landmark_embedding_dim, projection_dim),
+                    nn.ReLU(),
+                    nn.Linear(projection_dim, ct_delta_output_dim),
+                )
+            else:
+                self.trigger_ct_aux_head = nn.Sequential(
+                    nn.Linear(self.fused_dim + landmark_embedding_dim, projection_dim),
+                    nn.ReLU(),
+                    nn.Linear(projection_dim, ct_aux_output_dim),
+                )
+        else:
+            self.trigger_ct_aux_head = nn.Sequential(
+                nn.Linear(self.fused_dim + landmark_embedding_dim, projection_dim),
+                nn.ReLU(),
+                nn.Linear(projection_dim, ct_aux_output_dim),
+            )
 
     def forward(
         self,
@@ -989,16 +1030,30 @@ class DynamicReKSurv(nn.Module):
         landmark_summary = self.landmark_embedding(
             landmark_period.long().clamp(min=0, max=self.num_periods)
         )
-        pred_ct_delta = self.trigger_ct_aux_head(torch.cat([head_input, landmark_summary], dim=1))
+        ct_head_input = torch.cat([head_input, landmark_summary], dim=1)
+        if self.model_type == "trigger_orchard_v3" and self.ct_aux_target_mode == "window_endpoint_heads":
+            pred_ct_state_logits = self.trigger_ct_state_head(ct_head_input)
+            pred_ct_value = self.trigger_ct_value_head(ct_head_input)
+            pred_ct_delta = None
+        elif self.model_type == "trigger_orchard_v3" and self.ct_aux_target_mode == "window_prefix_vector_with_endpoint_lod":
+            pred_ct_state_logits = self.trigger_ct_state_head(ct_head_input)
+            pred_ct_delta = self.trigger_ct_delta_head(ct_head_input)
+            pred_ct_value = None
+        else:
+            pred_ct_delta = self.trigger_ct_aux_head(ct_head_input)
+            pred_ct_state_logits = None
+            pred_ct_value = None
         output = self._finalize_outputs(
             all_logits=all_logits,
             landmark_period=landmark_period,
-            pred_ct_delta=pred_ct_delta,
             aux_next_env=daily_env_prefix.new_zeros(batch_size, max_days, self.env_dim),
             attention_weights=attention_weights,
             period_attention_weights=None,
             spread_entropy=None,
             spread_valid_mask=None,
+            pred_ct_delta=pred_ct_delta,
+            pred_ct_state_logits=pred_ct_state_logits,
+            pred_ct_value=pred_ct_value,
         )
         if not self.training:
             output["trigger_window_weights"] = mixed_window_weights
@@ -1012,12 +1067,14 @@ class DynamicReKSurv(nn.Module):
         self,
         all_logits: torch.Tensor,
         landmark_period: torch.Tensor,
-        pred_ct_delta: torch.Tensor,
         aux_next_env: torch.Tensor,
         attention_weights: torch.Tensor,
         period_attention_weights: torch.Tensor | None,
         spread_entropy: torch.Tensor | None,
         spread_valid_mask: torch.Tensor | None,
+        pred_ct_delta: torch.Tensor | None = None,
+        pred_ct_state_logits: torch.Tensor | None = None,
+        pred_ct_value: torch.Tensor | None = None,
     ) -> dict:
         event_logits = all_logits[:, : self.num_periods]
         tail_logit = all_logits[:, self.num_periods :]
@@ -1034,9 +1091,14 @@ class DynamicReKSurv(nn.Module):
             "event_probs": event_probs,
             "tail_prob": tail_prob,
             "aux_next_env": aux_next_env,
-            "pred_ct_delta": pred_ct_delta,
             "attention_weights": attention_weights,
         }
+        if pred_ct_delta is not None:
+            output["pred_ct_delta"] = pred_ct_delta
+        if pred_ct_state_logits is not None:
+            output["pred_ct_state_logits"] = pred_ct_state_logits
+        if pred_ct_value is not None:
+            output["pred_ct_value"] = pred_ct_value
         if period_attention_weights is not None:
             output["period_attention_weights"] = period_attention_weights
         if spread_entropy is not None and spread_valid_mask is not None:

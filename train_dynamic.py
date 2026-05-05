@@ -25,7 +25,10 @@ from utils import (
     build_prefix_samples,
     compute_dynamic_loss,
     ct_delta_mean_absolute_error,
+    ct_state_confusion_counts,
+    ct_value_mean_absolute_error,
     fit_ct_delta_preprocessor,
+    fit_ct_value_preprocessor,
     fit_static_preprocessor,
     load_dynamic_hlb_dataset,
     load_fixed_split_indices,
@@ -121,7 +124,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--beta", type=float, default=0.2, help="Weight for the ranking loss")
     parser.add_argument("--gamma", type=float, default=None, help="Legacy alias for --gamma_env")
     parser.add_argument("--gamma_env", type=float, default=0.05, help="Weight for the next-day environment auxiliary loss")
-    parser.add_argument("--gamma_ct", type=float, default=0.10, help="Weight for the CT-delta auxiliary loss")
+    parser.add_argument("--gamma_ct", type=float, default=0.10, help="Weight for the CT auxiliary loss")
     parser.add_argument("--ct_aux_loss", type=str, default="huber", choices=["huber", "mse"], help="Loss type for the CT auxiliary head")
     parser.add_argument("--lag_spread_weight", type=float, default=0.01, help="Weight for the period-attention spread regularizer")
     parser.add_argument("--tree_attention_dropout", type=float, default=0.10, help="Dropout inside the tree-specific period attention scorer")
@@ -200,32 +203,157 @@ def build_explicit_window_specs(window_pairs: Sequence[str], num_periods: int) -
 
 def configure_ct_aux_target(args: argparse.Namespace, window_specs: Sequence[Tuple[int, int]]) -> None:
     model_type = str(args.model_type).strip().lower()
-    use_vector_target = bool(
-        args.use_ct_aux_task and model_type in {"trigger_orchard_v2", "trigger_orchard_v3"}
-    )
-    if not use_vector_target:
-        args.ct_aux_target_mode = "disabled" if not args.use_ct_aux_task else "next_delta"
+    if not args.use_ct_aux_task:
+        args.ct_aux_target_mode = "disabled"
+        args.ct_aux_output_dim = 1
         args.ct_delta_output_dim = 1
+        args.ct_state_output_dim = 1
         args.ct_aux_window_specs = []
         return
 
-    max_endpoint = max((int(landmark) + int(horizon) for landmark, horizon in window_specs), default=1)
-    args.ct_aux_target_mode = "window_prefix_vector"
-    args.ct_delta_output_dim = max(max_endpoint - 1, 1)
-    args.ct_aux_window_specs = [(int(landmark), int(horizon)) for landmark, horizon in window_specs]
+    if model_type == "trigger_orchard_v3":
+        max_endpoint = max((int(landmark) + int(horizon) for landmark, horizon in window_specs), default=1)
+        args.ct_aux_target_mode = "window_prefix_vector_with_endpoint_lod"
+        args.ct_delta_output_dim = max(max_endpoint - 1, 1)
+        args.ct_state_output_dim = max(len(window_specs), 1)
+        args.ct_aux_output_dim = int(args.ct_delta_output_dim)
+        args.ct_aux_window_specs = [(int(landmark), int(horizon)) for landmark, horizon in window_specs]
+        return
+
+    if model_type == "trigger_orchard_v2":
+        max_endpoint = max((int(landmark) + int(horizon) for landmark, horizon in window_specs), default=1)
+        args.ct_aux_target_mode = "window_prefix_vector"
+        args.ct_aux_output_dim = max(max_endpoint - 1, 1)
+        args.ct_delta_output_dim = int(args.ct_aux_output_dim)
+        args.ct_state_output_dim = 1
+        args.ct_aux_window_specs = [(int(landmark), int(horizon)) for landmark, horizon in window_specs]
+        return
+
+    args.ct_aux_target_mode = "next_delta"
+    args.ct_aux_output_dim = 1
+    args.ct_delta_output_dim = 1
+    args.ct_state_output_dim = 1
+    args.ct_aux_window_specs = []
 
 
 def ct_prefix_sample_kwargs(args: argparse.Namespace) -> Dict[str, object]:
-    if getattr(args, "ct_aux_target_mode", "") != "window_prefix_vector":
+    target_mode = normalize_ct_target_mode(getattr(args, "ct_aux_target_mode", ""))
+    if target_mode == "window_prefix_vector_with_endpoint_lod":
+        return {
+            "ct_delta_output_dim": int(args.ct_delta_output_dim),
+            "ct_state_output_dim": int(args.ct_state_output_dim),
+            "ct_aux_window_specs": args.ct_aux_window_specs,
+            "ct_aux_target_mode": target_mode,
+        }
+    if target_mode not in {"window_endpoint_heads", "window_prefix_vector"}:
         return {}
     return {
-        "ct_delta_output_dim": int(args.ct_delta_output_dim),
+        "ct_aux_output_dim": int(args.ct_aux_output_dim),
         "ct_aux_window_specs": args.ct_aux_window_specs,
+        "ct_aux_target_mode": target_mode,
     }
 
 
 def count_ct_aux_valid_targets(samples: Sequence[PrefixSample]) -> int:
     return int(sum(np.asarray(sample.ct_aux_mask, dtype=np.float32).sum() for sample in samples))
+
+
+def count_ct_delta_supervision_targets(samples: Sequence[PrefixSample]) -> int:
+    total = 0
+    for sample in samples:
+        mask = np.asarray(sample.ct_aux_mask, dtype=np.float32).reshape(-1) > 0.5
+        if sample.ct_aux_window_mask is None:
+            total += int(mask.sum())
+            continue
+
+        window_mask = np.asarray(sample.ct_aux_window_mask, dtype=np.float32) > 0.5
+        if window_mask.ndim == mask.ndim:
+            combined = window_mask & mask
+        elif window_mask.ndim == mask.ndim + 1:
+            combined = window_mask & mask.reshape((1,) + mask.shape)
+        else:
+            raise ValueError(
+                "Unsupported CT auxiliary mask shapes in sample counting: "
+                f"sample={mask.shape}, window={window_mask.shape}"
+            )
+        total += int(combined.sum())
+    return total
+
+
+def count_ct_endpoint_valid_targets(samples: Sequence[PrefixSample]) -> Dict[str, int]:
+    return {
+        "state": int(sum(np.asarray(sample.ct_state_mask, dtype=np.float32).sum() for sample in samples)),
+        "value": int(sum(np.asarray(sample.ct_value_mask, dtype=np.float32).sum() for sample in samples)),
+    }
+
+
+def compute_balanced_accuracy(tp: int, tn: int, fp: int, fn: int) -> float | None:
+    recalls = []
+    positive_n = tp + fn
+    negative_n = tn + fp
+    if positive_n > 0:
+        recalls.append(tp / positive_n)
+    if negative_n > 0:
+        recalls.append(tn / negative_n)
+    if not recalls:
+        return None
+    return float(np.mean(recalls))
+
+
+def normalize_ct_target_mode(target_mode: str) -> str:
+    return str(target_mode).strip().lower()
+
+
+def is_window_endpoint_ct_mode(target_mode: str) -> bool:
+    return normalize_ct_target_mode(target_mode) == "window_endpoint_heads"
+
+
+def is_window_delta_lod_ct_mode(target_mode: str) -> bool:
+    return normalize_ct_target_mode(target_mode) == "window_prefix_vector_with_endpoint_lod"
+
+
+def format_prefix_metrics_for_output(
+    prefix_metrics: Dict[str, float | None],
+    target_mode: str,
+) -> Dict[str, float | None]:
+    payload = {
+        "total": prefix_metrics["total"],
+        "ll": prefix_metrics["ll"],
+        "rank": prefix_metrics["rank"],
+        "env_aux": prefix_metrics["env_aux"],
+        "ct_aux": prefix_metrics["ct_aux"],
+        "spread": prefix_metrics["spread"],
+    }
+    if is_window_delta_lod_ct_mode(target_mode):
+        payload.update(
+            {
+                "ct_delta_loss": prefix_metrics["ct_delta"],
+                "ct_state_loss": prefix_metrics["ct_state"],
+                "ct_delta_mae_exact": prefix_metrics["ct_delta_mae_exact"],
+                "ct_delta_valid_n": prefix_metrics["ct_delta_valid_n"],
+                "ct_state_bal_acc": prefix_metrics["ct_state_bal_acc"],
+                "ct_state_valid_n": prefix_metrics["ct_state_valid_n"],
+            }
+        )
+    elif is_window_endpoint_ct_mode(target_mode):
+        payload.update(
+            {
+                "ct_state_loss": prefix_metrics["ct_state"],
+                "ct_value_loss": prefix_metrics["ct_value"],
+                "ct_state_bal_acc": prefix_metrics["ct_state_bal_acc"],
+                "ct_state_valid_n": prefix_metrics["ct_state_valid_n"],
+                "ct_value_mae_exact": prefix_metrics["ct_value_mae_exact"],
+                "ct_value_valid_n": prefix_metrics["ct_value_valid_n"],
+            }
+        )
+    else:
+        payload.update(
+            {
+                "ct_aux_mae": prefix_metrics["ct_delta_mae_exact"],
+                "ct_aux_valid_n": prefix_metrics["ct_delta_valid_n"],
+            }
+        )
+    return payload
 
 
 def build_weighted_sampler(samples: Sequence[PrefixSample]) -> WeightedRandomSampler:
@@ -268,6 +396,9 @@ def instantiate_model(args: argparse.Namespace, tree_data, static_x: np.ndarray)
         tree_attention_dropout=args.tree_attention_dropout,
         static_attention_dim=args.static_attention_dim,
         ct_delta_output_dim=getattr(args, "ct_delta_output_dim", 1),
+        ct_aux_output_dim=getattr(args, "ct_aux_output_dim", 1),
+        ct_state_output_dim=getattr(args, "ct_state_output_dim", 1),
+        ct_aux_target_mode=getattr(args, "ct_aux_target_mode", ""),
     )
 
 
@@ -309,6 +440,9 @@ def train_one_epoch(
     running_rank = 0.0
     running_env_aux = 0.0
     running_ct_aux = 0.0
+    running_ct_state = 0.0
+    running_ct_delta = 0.0
+    running_ct_value = 0.0
     running_spread = 0.0
     num_samples = 0
 
@@ -342,6 +476,9 @@ def train_one_epoch(
         running_rank += float(losses["rank"].item()) * batch_size
         running_env_aux += float(losses["env_aux"].item()) * batch_size
         running_ct_aux += float(losses["ct_aux"].item()) * batch_size
+        running_ct_state += float(losses["ct_state"].item()) * batch_size
+        running_ct_delta += float(losses["ct_delta"].item()) * batch_size
+        running_ct_value += float(losses["ct_value"].item()) * batch_size
         running_spread += float(losses["spread"].item()) * batch_size
 
     return {
@@ -350,6 +487,9 @@ def train_one_epoch(
         "rank": running_rank / max(num_samples, 1),
         "env_aux": running_env_aux / max(num_samples, 1),
         "ct_aux": running_ct_aux / max(num_samples, 1),
+        "ct_state": running_ct_state / max(num_samples, 1),
+        "ct_delta": running_ct_delta / max(num_samples, 1),
+        "ct_value": running_ct_value / max(num_samples, 1),
         "spread": running_spread / max(num_samples, 1),
     }
 
@@ -376,9 +516,18 @@ def evaluate_prefix_losses(
     running_rank = 0.0
     running_env_aux = 0.0
     running_ct_aux = 0.0
+    running_ct_state = 0.0
+    running_ct_delta = 0.0
+    running_ct_value = 0.0
     running_spread = 0.0
-    running_ct_abs = 0.0
-    running_ct_count = 0
+    running_ct_delta_abs = 0.0
+    running_ct_delta_count = 0
+    running_ct_value_abs = 0.0
+    running_ct_value_count = 0
+    state_tp = 0
+    state_tn = 0
+    state_fp = 0
+    state_fn = 0
     num_samples = 0
 
     for batch in loader:
@@ -406,19 +555,62 @@ def evaluate_prefix_losses(
         running_rank += float(losses["rank"].item()) * batch_size
         running_env_aux += float(losses["env_aux"].item()) * batch_size
         running_ct_aux += float(losses["ct_aux"].item()) * batch_size
+        running_ct_state += float(losses["ct_state"].item()) * batch_size
+        running_ct_delta += float(losses["ct_delta"].item()) * batch_size
+        running_ct_value += float(losses["ct_value"].item()) * batch_size
         running_spread += float(losses["spread"].item()) * batch_size
 
         if use_ct_aux_task:
-            batch_ct_mae, batch_ct_count = ct_delta_mean_absolute_error(
-                pred_ct_delta=model_output["pred_ct_delta"],
-                ct_delta_target=batch["ct_delta_target"],
-                ct_aux_mask=batch["ct_aux_mask"],
-                target_mean=ct_target_mean,
-                target_std=ct_target_std,
-                ct_aux_window_mask=batch.get("ct_aux_window_mask"),
-            )
-            running_ct_abs += float(batch_ct_mae.item()) * batch_ct_count
-            running_ct_count += batch_ct_count
+            if "pred_ct_state_logits" in model_output and "pred_ct_delta" in model_output:
+                confusion = ct_state_confusion_counts(
+                    pred_ct_state_logits=model_output["pred_ct_state_logits"],
+                    ct_state_target=batch["ct_state_target"],
+                    ct_state_mask=batch["ct_state_mask"],
+                )
+                state_tp += confusion["tp"]
+                state_tn += confusion["tn"]
+                state_fp += confusion["fp"]
+                state_fn += confusion["fn"]
+                batch_ct_delta_mae, batch_ct_delta_count = ct_delta_mean_absolute_error(
+                    pred_ct_delta=model_output["pred_ct_delta"],
+                    ct_delta_target=batch["ct_delta_target"],
+                    ct_aux_mask=batch["ct_aux_mask"],
+                    target_mean=ct_target_mean,
+                    target_std=ct_target_std,
+                    ct_aux_window_mask=batch.get("ct_aux_window_mask"),
+                )
+                running_ct_delta_abs += float(batch_ct_delta_mae.item()) * batch_ct_delta_count
+                running_ct_delta_count += batch_ct_delta_count
+            elif "pred_ct_state_logits" in model_output and "pred_ct_value" in model_output:
+                confusion = ct_state_confusion_counts(
+                    pred_ct_state_logits=model_output["pred_ct_state_logits"],
+                    ct_state_target=batch["ct_state_target"],
+                    ct_state_mask=batch["ct_state_mask"],
+                )
+                state_tp += confusion["tp"]
+                state_tn += confusion["tn"]
+                state_fp += confusion["fp"]
+                state_fn += confusion["fn"]
+                batch_ct_value_mae, batch_ct_value_count = ct_value_mean_absolute_error(
+                    pred_ct_value=model_output["pred_ct_value"],
+                    ct_value_target=batch["ct_value_target"],
+                    ct_value_mask=batch["ct_value_mask"],
+                    target_mean=ct_target_mean,
+                    target_std=ct_target_std,
+                )
+                running_ct_value_abs += float(batch_ct_value_mae.item()) * batch_ct_value_count
+                running_ct_value_count += batch_ct_value_count
+            else:
+                batch_ct_mae, batch_ct_count = ct_delta_mean_absolute_error(
+                    pred_ct_delta=model_output["pred_ct_delta"],
+                    ct_delta_target=batch["ct_delta_target"],
+                    ct_aux_mask=batch["ct_aux_mask"],
+                    target_mean=ct_target_mean,
+                    target_std=ct_target_std,
+                    ct_aux_window_mask=batch.get("ct_aux_window_mask"),
+                )
+                running_ct_delta_abs += float(batch_ct_mae.item()) * batch_ct_count
+                running_ct_delta_count += batch_ct_count
 
     return {
         "total": running_total / max(num_samples, 1),
@@ -426,9 +618,16 @@ def evaluate_prefix_losses(
         "rank": running_rank / max(num_samples, 1),
         "env_aux": running_env_aux / max(num_samples, 1),
         "ct_aux": running_ct_aux / max(num_samples, 1),
+        "ct_state": running_ct_state / max(num_samples, 1),
+        "ct_delta": running_ct_delta / max(num_samples, 1),
+        "ct_value": running_ct_value / max(num_samples, 1),
         "spread": running_spread / max(num_samples, 1),
-        "ct_aux_mae": running_ct_abs / running_ct_count if running_ct_count > 0 else None,
-        "ct_aux_valid_n": int(running_ct_count),
+        "ct_state_bal_acc": compute_balanced_accuracy(state_tp, state_tn, state_fp, state_fn),
+        "ct_state_valid_n": int(state_tp + state_tn + state_fp + state_fn),
+        "ct_delta_mae_exact": running_ct_delta_abs / running_ct_delta_count if running_ct_delta_count > 0 else None,
+        "ct_delta_valid_n": int(running_ct_delta_count),
+        "ct_value_mae_exact": running_ct_value_abs / running_ct_value_count if running_ct_value_count > 0 else None,
+        "ct_value_valid_n": int(running_ct_value_count),
     }
 
 
@@ -596,7 +795,10 @@ def run_repeat(
 
     ct_target_stats = {"mean": 0.0, "std": 1.0, "count": 0}
     if args.use_ct_aux_task:
-        ct_target_stats = fit_ct_delta_preprocessor(train_samples)
+        if is_window_endpoint_ct_mode(args.ct_aux_target_mode):
+            ct_target_stats = fit_ct_value_preprocessor(train_samples)
+        else:
+            ct_target_stats = fit_ct_delta_preprocessor(train_samples)
 
     train_dataset = PrefixSampleDataset(tree_data, static_x, train_samples)
     val_dataset = PrefixSampleDataset(tree_data, static_x, val_samples)
@@ -691,27 +893,57 @@ def run_repeat(
         scheduler.step(val_ctd if np.isfinite(val_ctd) else -1.0)
         current_lr = optimizer.param_groups[0]["lr"]
 
-        history.append(
-            {
-                "epoch": epoch,
-                "train_total_loss": train_loss["total"],
-                "train_ll_loss": train_loss["ll"],
-                "train_rank_loss": train_loss["rank"],
-                "train_env_aux_loss": train_loss["env_aux"],
-                "train_ct_aux_loss": train_loss["ct_aux"],
-                "train_spread_loss": train_loss["spread"],
-                "val_total_loss": val_prefix_metrics["total"],
-                "val_ll_loss": val_prefix_metrics["ll"],
-                "val_rank_loss": val_prefix_metrics["rank"],
-                "val_env_aux_loss": val_prefix_metrics["env_aux"],
-                "val_ct_aux_loss": val_prefix_metrics["ct_aux"],
-                "val_spread_loss": val_prefix_metrics["spread"],
-                "val_ct_aux_mae": val_prefix_metrics["ct_aux_mae"],
-                "val_ct_aux_valid_n": val_prefix_metrics["ct_aux_valid_n"],
-                "val_mean_ctd": val_ctd,
-                "lr": current_lr,
-            }
-        )
+        history_record = {
+            "epoch": epoch,
+            "train_total_loss": train_loss["total"],
+            "train_ll_loss": train_loss["ll"],
+            "train_rank_loss": train_loss["rank"],
+            "train_env_aux_loss": train_loss["env_aux"],
+            "train_ct_aux_loss": train_loss["ct_aux"],
+            "train_spread_loss": train_loss["spread"],
+            "val_total_loss": val_prefix_metrics["total"],
+            "val_ll_loss": val_prefix_metrics["ll"],
+            "val_rank_loss": val_prefix_metrics["rank"],
+            "val_env_aux_loss": val_prefix_metrics["env_aux"],
+            "val_ct_aux_loss": val_prefix_metrics["ct_aux"],
+            "val_spread_loss": val_prefix_metrics["spread"],
+            "val_mean_ctd": val_ctd,
+            "lr": current_lr,
+        }
+        if is_window_delta_lod_ct_mode(args.ct_aux_target_mode):
+            history_record.update(
+                {
+                    "train_ct_delta_loss": train_loss["ct_delta"],
+                    "train_ct_state_loss": train_loss["ct_state"],
+                    "val_ct_delta_loss": val_prefix_metrics["ct_delta"],
+                    "val_ct_state_loss": val_prefix_metrics["ct_state"],
+                    "val_ct_delta_mae_exact": val_prefix_metrics["ct_delta_mae_exact"],
+                    "val_ct_delta_valid_n": val_prefix_metrics["ct_delta_valid_n"],
+                    "val_ct_state_bal_acc": val_prefix_metrics["ct_state_bal_acc"],
+                    "val_ct_state_valid_n": val_prefix_metrics["ct_state_valid_n"],
+                }
+            )
+        elif is_window_endpoint_ct_mode(args.ct_aux_target_mode):
+            history_record.update(
+                {
+                    "train_ct_state_loss": train_loss["ct_state"],
+                    "train_ct_value_loss": train_loss["ct_value"],
+                    "val_ct_state_loss": val_prefix_metrics["ct_state"],
+                    "val_ct_value_loss": val_prefix_metrics["ct_value"],
+                    "val_ct_state_bal_acc": val_prefix_metrics["ct_state_bal_acc"],
+                    "val_ct_state_valid_n": val_prefix_metrics["ct_state_valid_n"],
+                    "val_ct_value_mae_exact": val_prefix_metrics["ct_value_mae_exact"],
+                    "val_ct_value_valid_n": val_prefix_metrics["ct_value_valid_n"],
+                }
+            )
+        else:
+            history_record.update(
+                {
+                    "val_ct_aux_mae": val_prefix_metrics["ct_delta_mae_exact"],
+                    "val_ct_aux_valid_n": val_prefix_metrics["ct_delta_valid_n"],
+                }
+            )
+        history.append(history_record)
 
         should_update_best = best_state is None
         if np.isfinite(val_ctd) and val_ctd > best_val_ctd:
@@ -728,13 +960,32 @@ def run_repeat(
             no_improve += 1
 
         if epoch == 1 or epoch % 10 == 0 or no_improve == 0:
-            print(
-                f"Repeat {repeat_index} | Epoch {epoch:03d} | "
-                f"Loss {train_loss['total']:.4f} | "
-                f"Val mean Ctd {val_ctd:.4f} | "
-                f"Val CT MAE {format_optional_metric(val_prefix_metrics['ct_aux_mae'])} | "
-                f"LR {current_lr:.6f}"
-            )
+            if is_window_delta_lod_ct_mode(args.ct_aux_target_mode):
+                print(
+                    f"Repeat {repeat_index} | Epoch {epoch:03d} | "
+                    f"Loss {train_loss['total']:.4f} | "
+                    f"Val mean Ctd {val_ctd:.4f} | "
+                    f"Val CT delta MAE {format_optional_metric(val_prefix_metrics['ct_delta_mae_exact'])} | "
+                    f"Val CT bal acc {format_optional_metric(val_prefix_metrics['ct_state_bal_acc'])} | "
+                    f"LR {current_lr:.6f}"
+                )
+            elif is_window_endpoint_ct_mode(args.ct_aux_target_mode):
+                print(
+                    f"Repeat {repeat_index} | Epoch {epoch:03d} | "
+                    f"Loss {train_loss['total']:.4f} | "
+                    f"Val mean Ctd {val_ctd:.4f} | "
+                    f"Val CT bal acc {format_optional_metric(val_prefix_metrics['ct_state_bal_acc'])} | "
+                    f"Val CT exact MAE {format_optional_metric(val_prefix_metrics['ct_value_mae_exact'])} | "
+                    f"LR {current_lr:.6f}"
+                )
+            else:
+                print(
+                    f"Repeat {repeat_index} | Epoch {epoch:03d} | "
+                    f"Loss {train_loss['total']:.4f} | "
+                    f"Val mean Ctd {val_ctd:.4f} | "
+                    f"Val CT MAE {format_optional_metric(val_prefix_metrics['ct_delta_mae_exact'])} | "
+                    f"LR {current_lr:.6f}"
+                )
 
         if no_improve >= args.patience:
             print(f"Repeat {repeat_index} early stopped at epoch {epoch}")
@@ -759,6 +1010,28 @@ def run_repeat(
     checkpoint_path = repeat_dir / "best_model.pth"
     torch.save(best_state, checkpoint_path)
 
+    if is_window_delta_lod_ct_mode(args.ct_aux_target_mode):
+        train_ct_target_counts = {
+            "state": int(sum(np.asarray(sample.ct_state_mask, dtype=np.float32).sum() for sample in train_samples)),
+            "delta": count_ct_delta_supervision_targets(train_samples),
+        }
+        val_ct_target_counts = {
+            "state": int(sum(np.asarray(sample.ct_state_mask, dtype=np.float32).sum() for sample in val_samples)),
+            "delta": count_ct_delta_supervision_targets(val_samples),
+        }
+    elif is_window_endpoint_ct_mode(args.ct_aux_target_mode):
+        train_ct_target_counts = count_ct_endpoint_valid_targets(train_samples)
+        val_ct_target_counts = count_ct_endpoint_valid_targets(val_samples)
+    else:
+        legacy_train_ct_valid_n = count_ct_aux_valid_targets(train_samples)
+        legacy_val_ct_valid_n = count_ct_aux_valid_targets(val_samples)
+        train_ct_target_counts = {"state": 0, "value": legacy_train_ct_valid_n}
+        val_ct_target_counts = {"state": 0, "value": legacy_val_ct_valid_n}
+    best_val_prefix_metrics_payload = format_prefix_metrics_for_output(
+        best_val_prefix_metrics,
+        args.ct_aux_target_mode,
+    )
+
     metrics_payload = {
         "repeat": repeat_index,
         "seed": repeat_seed,
@@ -770,8 +1043,6 @@ def run_repeat(
         "test_tree_ids": [str(tree_data.tree_ids[index]) for index in test_indices],
         "train_prefix_samples": int(len(train_samples)),
         "val_prefix_samples": int(len(val_samples)),
-        "train_ct_aux_valid_n": count_ct_aux_valid_targets(train_samples),
-        "val_ct_aux_valid_n": count_ct_aux_valid_targets(val_samples),
         "best_epoch": int(best_epoch),
         "best_val_mean_ctd": float(best_val_ctd),
         "model_type": args.model_type,
@@ -785,7 +1056,6 @@ def run_repeat(
             "ct_aux_target_mode",
             "disabled" if not args.use_ct_aux_task else "next_delta",
         ),
-        "ct_delta_output_dim": int(getattr(args, "ct_delta_output_dim", 1)),
         "ct_aux_window_specs": [list(spec) for spec in getattr(args, "ct_aux_window_specs", [])],
         "ct_aux_loss": args.ct_aux_loss,
         "env_aux_mode": args.env_aux_mode,
@@ -794,9 +1064,6 @@ def run_repeat(
         "static_attention_dim": int(args.static_attention_dim),
         "train_landmark_subset": None if args.train_landmark_subset is None else [int(value) for value in args.train_landmark_subset],
         "early_stop_window_specs": [list(spec) for spec in early_stop_window_specs],
-        "ct_target_mean": float(ct_target_stats["mean"]),
-        "ct_target_std": float(ct_target_stats["std"]),
-        "ct_target_count": int(ct_target_stats["count"]),
         "env_feature_dim": int(len(tree_data.env_feature_names)),
         "period_feature_dim": int(len(tree_data.period_feature_names)),
         "env_feature_names": tree_data.env_feature_names,
@@ -805,9 +1072,47 @@ def run_repeat(
         "static_feature_names": static_feature_names,
         "history": history,
         "validation_windows": best_val_records,
-        "best_validation_prefix_metrics": best_val_prefix_metrics,
+        "best_validation_prefix_metrics": best_val_prefix_metrics_payload,
         "test_windows": test_records,
     }
+    if is_window_delta_lod_ct_mode(args.ct_aux_target_mode):
+        metrics_payload.update(
+            {
+                "train_ct_state_valid_n": int(train_ct_target_counts["state"]),
+                "val_ct_state_valid_n": int(val_ct_target_counts["state"]),
+                "train_ct_delta_valid_n": int(train_ct_target_counts["delta"]),
+                "val_ct_delta_valid_n": int(val_ct_target_counts["delta"]),
+                "ct_delta_output_dim": int(getattr(args, "ct_delta_output_dim", 1)),
+                "ct_state_output_dim": int(getattr(args, "ct_state_output_dim", 1)),
+                "ct_target_mean": float(ct_target_stats["mean"]),
+                "ct_target_std": float(ct_target_stats["std"]),
+                "ct_target_count": int(ct_target_stats["count"]),
+            }
+        )
+    elif is_window_endpoint_ct_mode(args.ct_aux_target_mode):
+        metrics_payload.update(
+            {
+                "train_ct_state_valid_n": int(train_ct_target_counts["state"]),
+                "val_ct_state_valid_n": int(val_ct_target_counts["state"]),
+                "train_ct_value_valid_n": int(train_ct_target_counts["value"]),
+                "val_ct_value_valid_n": int(val_ct_target_counts["value"]),
+                "ct_aux_output_dim": int(getattr(args, "ct_aux_output_dim", 1)),
+                "ct_value_target_mean": float(ct_target_stats["mean"]),
+                "ct_value_target_std": float(ct_target_stats["std"]),
+                "ct_value_target_count": int(ct_target_stats["count"]),
+            }
+        )
+    else:
+        metrics_payload.update(
+            {
+                "train_ct_aux_valid_n": int(train_ct_target_counts["value"]),
+                "val_ct_aux_valid_n": int(val_ct_target_counts["value"]),
+                "ct_delta_output_dim": int(getattr(args, "ct_delta_output_dim", 1)),
+                "ct_target_mean": float(ct_target_stats["mean"]),
+                "ct_target_std": float(ct_target_stats["std"]),
+                "ct_target_count": int(ct_target_stats["count"]),
+            }
+        )
     with open(repeat_dir / "metrics.json", "w", encoding="utf-8") as file:
         json.dump(to_serializable(metrics_payload), file, ensure_ascii=False, indent=2)
 
@@ -924,10 +1229,17 @@ def main() -> None:
         f"| Period features: {args.period_feature_mode} | Env aux: {args.env_aux_mode} "
         f"| Tree spatial: {args.use_tree_id_spatial}"
     )
-    print(
-        f"CT auxiliary task: {'on' if args.use_ct_aux_task else 'off'} | "
-        f"CT target mode: {args.ct_aux_target_mode} | CT output dim: {args.ct_delta_output_dim}"
-    )
+    if is_window_delta_lod_ct_mode(args.ct_aux_target_mode):
+        print(
+            f"CT auxiliary task: {'on' if args.use_ct_aux_task else 'off'} | "
+            f"CT target mode: {args.ct_aux_target_mode} | "
+            f"CT delta dim: {args.ct_delta_output_dim} | CT state dim: {args.ct_state_output_dim}"
+        )
+    else:
+        print(
+            f"CT auxiliary task: {'on' if args.use_ct_aux_task else 'off'} | "
+            f"CT target mode: {args.ct_aux_target_mode} | CT output dim: {args.ct_aux_output_dim}"
+        )
 
     start_time = time.perf_counter()
     all_records: List[Dict[str, float]] = []

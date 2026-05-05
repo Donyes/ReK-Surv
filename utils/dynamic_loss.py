@@ -167,6 +167,162 @@ def ct_delta_mean_absolute_error(
     return torch.abs(pred - target).mean(), valid_count
 
 
+def ct_endpoint_auxiliary_loss(
+    pred_ct_state_logits: torch.Tensor,
+    ct_state_target: torch.Tensor,
+    ct_state_mask: torch.Tensor,
+    pred_ct_value: torch.Tensor,
+    ct_value_target: torch.Tensor,
+    ct_value_mask: torch.Tensor,
+    target_mean: float,
+    target_std: float,
+    loss_type: str = "huber",
+) -> dict[str, torch.Tensor | int]:
+    """
+    CT auxiliary loss for window-aligned endpoint state/value heads.
+    """
+    zero = pred_ct_state_logits.sum() * 0.0 + pred_ct_value.sum() * 0.0
+    state_mask = ct_state_mask > 0.5
+    value_mask = ct_value_mask > 0.5
+
+    state_valid_n = int(state_mask.sum().item())
+    value_valid_n = int(value_mask.sum().item())
+
+    state_loss = zero
+    if state_valid_n > 0:
+        state_loss = F.binary_cross_entropy_with_logits(
+            pred_ct_state_logits[state_mask],
+            ct_state_target[state_mask],
+        )
+
+    value_loss = zero
+    if value_valid_n > 0:
+        safe_std = max(float(target_std), 1e-8)
+        normalized_target = (ct_value_target[value_mask] - float(target_mean)) / safe_std
+        pred_value = pred_ct_value[value_mask]
+        if loss_type == "huber":
+            value_loss = F.huber_loss(pred_value, normalized_target)
+        elif loss_type == "mse":
+            value_loss = F.mse_loss(pred_value, normalized_target)
+        else:
+            raise ValueError(f"Unsupported CT auxiliary loss: {loss_type}")
+
+    active_losses = []
+    if state_valid_n > 0:
+        active_losses.append(state_loss)
+    if value_valid_n > 0:
+        active_losses.append(value_loss)
+    total_loss = zero if not active_losses else torch.stack(active_losses).mean()
+
+    return {
+        "total": total_loss,
+        "state": state_loss,
+        "value": value_loss,
+        "state_valid_n": state_valid_n,
+        "value_valid_n": value_valid_n,
+    }
+
+
+def ct_delta_endpoint_lod_auxiliary_loss(
+    pred_ct_delta: torch.Tensor,
+    ct_delta_target: torch.Tensor,
+    ct_aux_mask: torch.Tensor,
+    pred_ct_state_logits: torch.Tensor,
+    ct_state_target: torch.Tensor,
+    ct_state_mask: torch.Tensor,
+    target_mean: float,
+    target_std: float,
+    loss_type: str = "huber",
+    ct_aux_window_mask: torch.Tensor | None = None,
+) -> dict[str, torch.Tensor | int]:
+    """
+    CT auxiliary loss for global delta regression plus endpoint LOD classification.
+    """
+    zero = pred_ct_delta.sum() * 0.0 + pred_ct_state_logits.sum() * 0.0
+    delta_mask = _combined_ct_aux_mask(ct_aux_mask, ct_aux_window_mask)
+    delta_valid_n = int(delta_mask.sum().item())
+    state_mask = ct_state_mask > 0.5
+    state_valid_n = int(state_mask.sum().item())
+
+    delta_loss = zero
+    if delta_valid_n > 0:
+        delta_loss = ct_delta_auxiliary_loss(
+            pred_ct_delta=pred_ct_delta,
+            ct_delta_target=ct_delta_target,
+            ct_aux_mask=ct_aux_mask,
+            target_mean=target_mean,
+            target_std=target_std,
+            loss_type=loss_type,
+            ct_aux_window_mask=ct_aux_window_mask,
+        )
+
+    state_loss = zero
+    if state_valid_n > 0:
+        state_loss = F.binary_cross_entropy_with_logits(
+            pred_ct_state_logits[state_mask],
+            ct_state_target[state_mask],
+        )
+
+    active_losses = []
+    if delta_valid_n > 0:
+        active_losses.append(delta_loss)
+    if state_valid_n > 0:
+        active_losses.append(state_loss)
+    total_loss = zero if not active_losses else torch.stack(active_losses).mean()
+
+    return {
+        "total": total_loss,
+        "delta": delta_loss,
+        "state": state_loss,
+        "delta_valid_n": delta_valid_n,
+        "state_valid_n": state_valid_n,
+    }
+
+
+def ct_value_mean_absolute_error(
+    pred_ct_value: torch.Tensor,
+    ct_value_target: torch.Tensor,
+    ct_value_mask: torch.Tensor,
+    target_mean: float,
+    target_std: float,
+) -> tuple[torch.Tensor, int]:
+    """
+    Mean absolute error in the original CT scale on exact-value targets only.
+    """
+    valid_mask = ct_value_mask > 0.5
+    valid_count = int(valid_mask.sum().item())
+    if valid_count == 0:
+        return pred_ct_value.sum() * 0.0, 0
+
+    safe_std = max(float(target_std), 1e-8)
+    pred = pred_ct_value[valid_mask] * safe_std + float(target_mean)
+    target = ct_value_target[valid_mask]
+    return torch.abs(pred - target).mean(), valid_count
+
+
+def ct_state_confusion_counts(
+    pred_ct_state_logits: torch.Tensor,
+    ct_state_target: torch.Tensor,
+    ct_state_mask: torch.Tensor,
+) -> dict[str, int]:
+    """
+    Confusion counts for CT>=40 endpoint classification on valid windows only.
+    """
+    valid_mask = ct_state_mask > 0.5
+    valid_count = int(valid_mask.sum().item())
+    if valid_count == 0:
+        return {"tp": 0, "tn": 0, "fp": 0, "fn": 0}
+
+    pred_positive = pred_ct_state_logits[valid_mask] >= 0.0
+    target_positive = ct_state_target[valid_mask] > 0.5
+    return {
+        "tp": int((pred_positive & target_positive).sum().item()),
+        "tn": int((~pred_positive & ~target_positive).sum().item()),
+        "fp": int((pred_positive & ~target_positive).sum().item()),
+        "fn": int((~pred_positive & target_positive).sum().item()),
+    }
+
+
 def _combined_ct_aux_mask(
     ct_aux_mask: torch.Tensor,
     ct_aux_window_mask: torch.Tensor | None,
@@ -261,16 +417,52 @@ def compute_dynamic_loss(
         env_aux_loss = model_output["event_probs"].sum() * 0.0
 
     ct_aux_loss_value = env_aux_loss.new_zeros(())
+    ct_state_loss_value = env_aux_loss.new_zeros(())
+    ct_delta_loss_value = env_aux_loss.new_zeros(())
+    ct_value_loss_value = env_aux_loss.new_zeros(())
     if use_ct_aux_task:
-        ct_aux_loss_value = ct_delta_auxiliary_loss(
-            pred_ct_delta=model_output["pred_ct_delta"],
-            ct_delta_target=batch["ct_delta_target"],
-            ct_aux_mask=batch["ct_aux_mask"],
-            target_mean=ct_target_mean,
-            target_std=ct_target_std,
-            loss_type=ct_aux_loss,
-            ct_aux_window_mask=batch.get("ct_aux_window_mask"),
-        )
+        if "pred_ct_state_logits" in model_output and "pred_ct_delta" in model_output:
+            ct_hybrid_losses = ct_delta_endpoint_lod_auxiliary_loss(
+                pred_ct_delta=model_output["pred_ct_delta"],
+                ct_delta_target=batch["ct_delta_target"],
+                ct_aux_mask=batch["ct_aux_mask"],
+                pred_ct_state_logits=model_output["pred_ct_state_logits"],
+                ct_state_target=batch["ct_state_target"],
+                ct_state_mask=batch["ct_state_mask"],
+                target_mean=ct_target_mean,
+                target_std=ct_target_std,
+                loss_type=ct_aux_loss,
+                ct_aux_window_mask=batch.get("ct_aux_window_mask"),
+            )
+            ct_aux_loss_value = ct_hybrid_losses["total"]
+            ct_delta_loss_value = ct_hybrid_losses["delta"]
+            ct_state_loss_value = ct_hybrid_losses["state"]
+        elif "pred_ct_state_logits" in model_output and "pred_ct_value" in model_output:
+            ct_endpoint_losses = ct_endpoint_auxiliary_loss(
+                pred_ct_state_logits=model_output["pred_ct_state_logits"],
+                ct_state_target=batch["ct_state_target"],
+                ct_state_mask=batch["ct_state_mask"],
+                pred_ct_value=model_output["pred_ct_value"],
+                ct_value_target=batch["ct_value_target"],
+                ct_value_mask=batch["ct_value_mask"],
+                target_mean=ct_target_mean,
+                target_std=ct_target_std,
+                loss_type=ct_aux_loss,
+            )
+            ct_aux_loss_value = ct_endpoint_losses["total"]
+            ct_state_loss_value = ct_endpoint_losses["state"]
+            ct_value_loss_value = ct_endpoint_losses["value"]
+        else:
+            ct_aux_loss_value = ct_delta_auxiliary_loss(
+                pred_ct_delta=model_output["pred_ct_delta"],
+                ct_delta_target=batch["ct_delta_target"],
+                ct_aux_mask=batch["ct_aux_mask"],
+                target_mean=ct_target_mean,
+                target_std=ct_target_std,
+                loss_type=ct_aux_loss,
+                ct_aux_window_mask=batch.get("ct_aux_window_mask"),
+            )
+            ct_delta_loss_value = ct_aux_loss_value
 
     spread_loss = env_aux_loss.new_zeros(())
     if lag_spread_weight > 0.0 and "spread_entropy" in model_output and "spread_valid_mask" in model_output:
@@ -293,6 +485,9 @@ def compute_dynamic_loss(
         "rank": ranking_loss,
         "env_aux": env_aux_loss,
         "ct_aux": ct_aux_loss_value,
+        "ct_state": ct_state_loss_value,
+        "ct_delta": ct_delta_loss_value,
+        "ct_value": ct_value_loss_value,
         "spread": spread_loss,
         "aux": env_aux_loss,
     }

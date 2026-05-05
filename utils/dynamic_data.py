@@ -144,6 +144,10 @@ class PrefixSample:
     future_event: int
     ct_aux_mask: int | np.ndarray = 0
     ct_delta_target: float | np.ndarray = 0.0
+    ct_state_target: float | np.ndarray = 0.0
+    ct_state_mask: int | np.ndarray = 0
+    ct_value_target: float | np.ndarray = 0.0
+    ct_value_mask: int | np.ndarray = 0
     ct_aux_window_mask: np.ndarray | None = None
     current_ct: float = float("nan")
     next_ct: float = float("nan")
@@ -174,6 +178,10 @@ class PrefixSampleDataset(Dataset):
         tree_index = sample.tree_index
         ct_aux_mask = np.asarray(sample.ct_aux_mask, dtype=np.float32).reshape(-1)
         ct_delta_target = np.asarray(sample.ct_delta_target, dtype=np.float32).reshape(-1)
+        ct_state_target = np.asarray(sample.ct_state_target, dtype=np.float32).reshape(-1)
+        ct_state_mask = np.asarray(sample.ct_state_mask, dtype=np.float32).reshape(-1)
+        ct_value_target = np.asarray(sample.ct_value_target, dtype=np.float32).reshape(-1)
+        ct_value_mask = np.asarray(sample.ct_value_mask, dtype=np.float32).reshape(-1)
         if sample.ct_aux_window_mask is None:
             ct_aux_window_mask = np.ones((1, ct_delta_target.size), dtype=np.float32)
         else:
@@ -190,6 +198,10 @@ class PrefixSampleDataset(Dataset):
             "tree_index": torch.tensor(tree_index, dtype=torch.long),
             "ct_aux_mask": torch.tensor(ct_aux_mask, dtype=torch.float32),
             "ct_delta_target": torch.tensor(ct_delta_target, dtype=torch.float32),
+            "ct_state_target": torch.tensor(ct_state_target, dtype=torch.float32),
+            "ct_state_mask": torch.tensor(ct_state_mask, dtype=torch.float32),
+            "ct_value_target": torch.tensor(ct_value_target, dtype=torch.float32),
+            "ct_value_mask": torch.tensor(ct_value_mask, dtype=torch.float32),
             "ct_aux_window_mask": torch.tensor(ct_aux_window_mask, dtype=torch.float32),
             "current_ct": torch.tensor([sample.current_ct], dtype=torch.float32),
             "next_ct": torch.tensor([sample.next_ct], dtype=torch.float32),
@@ -425,6 +437,43 @@ def fit_ct_delta_preprocessor(samples: Sequence[PrefixSample]) -> Dict[str, floa
     }
 
 
+def fit_ct_value_preprocessor(samples: Sequence[PrefixSample]) -> Dict[str, float]:
+    """
+    Fit train-split-only standardization stats for valid exact CT targets.
+    """
+    valid_target_chunks = []
+    for sample in samples:
+        target = np.asarray(sample.ct_value_target, dtype=np.float32).reshape(-1)
+        mask = np.asarray(sample.ct_value_mask, dtype=np.float32).reshape(-1) > 0.5
+        if target.shape != mask.shape:
+            raise ValueError(
+                f"CT value target and mask shapes do not match: target={target.shape}, mask={mask.shape}"
+            )
+        if mask.any():
+            valid_target_chunks.append(target[mask])
+    valid_targets = (
+        np.concatenate(valid_target_chunks, axis=0)
+        if valid_target_chunks
+        else np.asarray([], dtype=np.float32)
+    )
+    if valid_targets.size == 0:
+        return {
+            "mean": 0.0,
+            "std": 1.0,
+            "count": 0,
+        }
+
+    target_std = float(valid_targets.std())
+    if target_std == 0.0:
+        target_std = 1.0
+
+    return {
+        "mean": float(valid_targets.mean()),
+        "std": target_std,
+        "count": int(valid_targets.size),
+    }
+
+
 def transform_static_features(
     tree_data: DynamicTreeData,
     preprocessor: Dict[str, np.ndarray | List[int]],
@@ -593,7 +642,10 @@ def build_prefix_samples(
     include_landmark_zero: bool = True,
     allowed_landmarks: Sequence[int] | None = None,
     ct_delta_output_dim: int | None = None,
+    ct_aux_output_dim: int | None = None,
+    ct_state_output_dim: int | None = None,
     ct_aux_window_specs: Sequence[tuple[int, int]] | None = None,
+    ct_aux_target_mode: str | None = None,
 ) -> List[PrefixSample]:
     """
     Build prefix samples at period boundaries for trees still at risk.
@@ -602,10 +654,24 @@ def build_prefix_samples(
     upper_landmark = tree_data.num_periods - 1
     prefix_samples: List[PrefixSample] = []
     landmark_filter = None if allowed_landmarks is None else {int(value) for value in allowed_landmarks}
-    vector_ct_dim = None if ct_delta_output_dim is None else max(int(ct_delta_output_dim), 1)
+    resolved_target_mode = str(ct_aux_target_mode or "").strip().lower()
+    endpoint_ct_dim = None
+    if resolved_target_mode == "window_endpoint_heads":
+        resolved_output_dim = ct_aux_output_dim if ct_aux_output_dim is not None else ct_state_output_dim
+        vector_ct_dim = None
+        endpoint_ct_dim = None if resolved_output_dim is None else max(int(resolved_output_dim), 1)
+    elif resolved_target_mode == "window_prefix_vector_with_endpoint_lod":
+        resolved_output_dim = ct_delta_output_dim if ct_delta_output_dim is not None else ct_aux_output_dim
+        vector_ct_dim = None if resolved_output_dim is None else max(int(resolved_output_dim), 1)
+        endpoint_ct_dim = max(int(ct_state_output_dim or 1), 1)
+    else:
+        resolved_output_dim = ct_aux_output_dim if ct_aux_output_dim is not None else ct_delta_output_dim
+        vector_ct_dim = None if resolved_output_dim is None else max(int(resolved_output_dim), 1)
+    if not resolved_target_mode:
+        resolved_target_mode = "next_delta" if vector_ct_dim is None else "window_prefix_vector"
     ct_aux_window_mask = (
         None
-        if vector_ct_dim is None
+        if vector_ct_dim is None or resolved_target_mode not in {"window_prefix_vector", "window_prefix_vector_with_endpoint_lod"}
         else _build_ct_aux_window_mask(ct_aux_window_specs, vector_ct_dim)
     )
 
@@ -615,19 +681,65 @@ def build_prefix_samples(
         for landmark_period in range(lower_landmark, last_landmark + 1):
             if landmark_filter is not None and int(landmark_period) not in landmark_filter:
                 continue
-            if vector_ct_dim is None:
+            if resolved_target_mode == "window_endpoint_heads":
+                (
+                    ct_state_target,
+                    ct_state_mask,
+                    ct_value_target,
+                    ct_value_mask,
+                ) = _build_ct_endpoint_targets(
+                    tree_data=tree_data,
+                    tree_index=int(tree_index),
+                    landmark_period=landmark_period,
+                    window_specs=ct_aux_window_specs,
+                    output_dim=endpoint_ct_dim or 0,
+                )
+                ct_aux_mask = 0
+                ct_delta_target = 0.0
+                sample_window_mask = None
+                current_ct = float("nan")
+                next_ct = float("nan")
+            elif resolved_target_mode == "window_prefix_vector_with_endpoint_lod":
+                ct_aux_mask, ct_delta_target = _build_ct_aux_vector_target(
+                    tree_data=tree_data,
+                    tree_index=int(tree_index),
+                    output_dim=vector_ct_dim or 0,
+                    require_exact_values=True,
+                )
+                ct_state_target, ct_state_mask = _build_ct_endpoint_state_targets(
+                    tree_data=tree_data,
+                    tree_index=int(tree_index),
+                    landmark_period=landmark_period,
+                    window_specs=ct_aux_window_specs,
+                    output_dim=endpoint_ct_dim or 0,
+                )
+                ct_value_target = np.zeros(endpoint_ct_dim or 0, dtype=np.float32)
+                ct_value_mask = np.zeros(endpoint_ct_dim or 0, dtype=np.float32)
+                current_ct = float("nan")
+                next_ct = float("nan")
+                sample_window_mask = ct_aux_window_mask
+            elif vector_ct_dim is None:
                 ct_aux_mask, ct_delta_target, current_ct, next_ct = _build_ct_aux_target(
                     tree_data=tree_data,
                     tree_index=int(tree_index),
                     landmark_period=landmark_period,
                 )
+                ct_state_target = 0.0
+                ct_state_mask = 0
+                ct_value_target = 0.0
+                ct_value_mask = 0
                 sample_window_mask = None
             else:
                 ct_aux_mask, ct_delta_target = _build_ct_aux_vector_target(
                     tree_data=tree_data,
                     tree_index=int(tree_index),
                     output_dim=vector_ct_dim,
+                    require_exact_values=False,
                 )
+                ct_state_target = np.zeros(vector_ct_dim, dtype=np.float32)
+                ct_state_mask = np.zeros(vector_ct_dim, dtype=np.float32)
+                ct_value_target = np.zeros(vector_ct_dim, dtype=np.float32)
+                ct_value_mask = np.zeros(vector_ct_dim, dtype=np.float32)
                 current_ct = float("nan")
                 next_ct = float("nan")
                 sample_window_mask = ct_aux_window_mask
@@ -639,6 +751,10 @@ def build_prefix_samples(
                     future_event=int(tree_data.event_flag[tree_index]),
                     ct_aux_mask=ct_aux_mask,
                     ct_delta_target=ct_delta_target,
+                    ct_state_target=ct_state_target,
+                    ct_state_mask=ct_state_mask,
+                    ct_value_target=ct_value_target,
+                    ct_value_mask=ct_value_mask,
                     ct_aux_window_mask=sample_window_mask,
                     current_ct=current_ct,
                     next_ct=next_ct,
@@ -985,6 +1101,7 @@ def _build_ct_aux_vector_target(
     tree_data: DynamicTreeData,
     tree_index: int,
     output_dim: int,
+    require_exact_values: bool = False,
 ) -> tuple[np.ndarray, np.ndarray]:
     if tree_data.ct_values is None or tree_data.ct_valid_mask is None:
         return (
@@ -1004,10 +1121,80 @@ def _build_ct_aux_vector_target(
     current_valid = tree_data.ct_valid_mask[tree_index, :usable_count]
     next_valid = tree_data.ct_valid_mask[tree_index, 1 : usable_count + 1]
     valid_delta_mask = current_valid & next_valid
+    if require_exact_values:
+        valid_delta_mask &= (current_values < 40.0) & (next_values < 40.0)
 
     target[:usable_count] = (next_values - current_values).astype(np.float32)
     mask[:usable_count] = valid_delta_mask.astype(np.float32)
     return mask, target
+
+
+def _build_ct_endpoint_state_targets(
+    tree_data: DynamicTreeData,
+    tree_index: int,
+    landmark_period: int,
+    window_specs: Sequence[tuple[int, int]] | None,
+    output_dim: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    state_target = np.zeros(max(int(output_dim), 0), dtype=np.float32)
+    state_mask = np.zeros(max(int(output_dim), 0), dtype=np.float32)
+
+    if output_dim <= 0 or tree_data.ct_values is None or tree_data.ct_valid_mask is None or not window_specs:
+        return state_target, state_mask
+
+    for target_index, (window_landmark, horizon) in enumerate(window_specs[:output_dim]):
+        if int(window_landmark) != int(landmark_period):
+            continue
+        endpoint_period = int(window_landmark) + int(horizon)
+        endpoint_index = endpoint_period - 1
+        if endpoint_index < 0 or endpoint_index >= int(tree_data.num_periods):
+            continue
+        if not tree_data.ct_valid_mask[tree_index, endpoint_index]:
+            continue
+
+        endpoint_value = float(tree_data.ct_values[tree_index, endpoint_index])
+        state_mask[target_index] = 1.0
+        state_target[target_index] = 1.0 if endpoint_value >= 40.0 else 0.0
+
+    return state_target, state_mask
+
+
+def _build_ct_endpoint_targets(
+    tree_data: DynamicTreeData,
+    tree_index: int,
+    landmark_period: int,
+    window_specs: Sequence[tuple[int, int]] | None,
+    output_dim: int,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    state_target, state_mask = _build_ct_endpoint_state_targets(
+        tree_data=tree_data,
+        tree_index=tree_index,
+        landmark_period=landmark_period,
+        window_specs=window_specs,
+        output_dim=output_dim,
+    )
+    value_target = np.zeros(max(int(output_dim), 0), dtype=np.float32)
+    value_mask = np.zeros(max(int(output_dim), 0), dtype=np.float32)
+
+    if output_dim <= 0 or tree_data.ct_values is None or tree_data.ct_valid_mask is None or not window_specs:
+        return state_target, state_mask, value_target, value_mask
+
+    for target_index, (window_landmark, horizon) in enumerate(window_specs[:output_dim]):
+        endpoint_period = int(window_landmark) + int(horizon)
+        endpoint_index = endpoint_period - 1
+        if endpoint_index < 0 or endpoint_index >= int(tree_data.num_periods):
+            continue
+        if int(window_landmark) != int(landmark_period) or not tree_data.ct_valid_mask[tree_index, endpoint_index]:
+            continue
+
+        endpoint_value = float(tree_data.ct_values[tree_index, endpoint_index])
+        if endpoint_value >= 40.0:
+            continue
+
+        value_target[target_index] = endpoint_value
+        value_mask[target_index] = 1.0
+
+    return state_target, state_mask, value_target, value_mask
 
 
 def _build_day_to_period(

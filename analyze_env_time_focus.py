@@ -25,6 +25,7 @@ from utils import (
     build_prefix_samples,
     compute_dynamic_loss,
     fit_ct_delta_preprocessor,
+    fit_ct_value_preprocessor,
     fit_static_preprocessor,
     load_dynamic_hlb_dataset,
     split_tree_indices,
@@ -293,19 +294,43 @@ def instantiate_model(tree_data, static_x: np.ndarray, config: Dict) -> DynamicR
         env_aux_mode=str(config.get("env_aux_mode", "next_day")),
         tree_attention_dropout=float(config.get("tree_attention_dropout", 0.10)),
         static_attention_dim=int(config.get("static_attention_dim", 32)),
-        ct_delta_output_dim=int(config.get("ct_delta_output_dim", 1)),
+        ct_delta_output_dim=int(config.get("ct_delta_output_dim", config.get("ct_aux_output_dim", 1))),
+        ct_aux_output_dim=int(config.get("ct_aux_output_dim", config.get("ct_delta_output_dim", 1))),
+        ct_state_output_dim=int(config.get("ct_state_output_dim", config.get("ct_aux_output_dim", 1))),
+        ct_aux_target_mode=str(config.get("ct_aux_target_mode", "")),
     )
 
 
 def ct_prefix_sample_kwargs(config: Dict) -> Dict[str, object]:
-    if str(config.get("ct_aux_target_mode", "")) != "window_prefix_vector":
+    target_mode = str(config.get("ct_aux_target_mode", ""))
+    if target_mode == "window_prefix_vector_with_endpoint_lod":
+        return {
+            "ct_delta_output_dim": int(config.get("ct_delta_output_dim", config.get("ct_aux_output_dim", 1))),
+            "ct_state_output_dim": int(config.get("ct_state_output_dim", len(config.get("ct_aux_window_specs", [])) or 1)),
+            "ct_aux_window_specs": [
+                (int(landmark), int(horizon))
+                for landmark, horizon in config.get("ct_aux_window_specs", [])
+            ],
+            "ct_aux_target_mode": target_mode,
+        }
+    if target_mode == "window_prefix_vector":
+        return {
+            "ct_aux_output_dim": int(config.get("ct_aux_output_dim", config.get("ct_delta_output_dim", 1))),
+            "ct_aux_window_specs": [
+                (int(landmark), int(horizon))
+                for landmark, horizon in config.get("ct_aux_window_specs", [])
+            ],
+            "ct_aux_target_mode": target_mode,
+        }
+    if target_mode != "window_endpoint_heads":
         return {}
     return {
-        "ct_delta_output_dim": int(config.get("ct_delta_output_dim", 1)),
+        "ct_aux_output_dim": int(config.get("ct_aux_output_dim", config.get("ct_delta_output_dim", 1))),
         "ct_aux_window_specs": [
             (int(landmark), int(horizon))
             for landmark, horizon in config.get("ct_aux_window_specs", [])
         ],
+        "ct_aux_target_mode": target_mode,
     }
 
 
@@ -1081,7 +1106,10 @@ def run_history_variant_repeat(
 
     ct_target_stats = {"mean": 0.0, "std": 1.0, "count": 0}
     if bool(artifact_config.get("use_ct_aux_task", False)):
-        ct_target_stats = fit_ct_delta_preprocessor(train_samples)
+        if str(artifact_config.get("ct_aux_target_mode", "")) == "window_endpoint_heads":
+            ct_target_stats = fit_ct_value_preprocessor(train_samples)
+        else:
+            ct_target_stats = fit_ct_delta_preprocessor(train_samples)
 
     model = instantiate_model(tree_data, static_x, artifact_config).to(device)
     optimizer = optim.Adam(
@@ -1911,7 +1939,10 @@ def run_period_history_variant_repeat(
 
     ct_target_stats = {"mean": 0.0, "std": 1.0, "count": 0}
     if bool(artifact_config.get("use_ct_aux_task", False)):
-        ct_target_stats = fit_ct_delta_preprocessor(train_samples)
+        if str(artifact_config.get("ct_aux_target_mode", "")) == "window_endpoint_heads":
+            ct_target_stats = fit_ct_value_preprocessor(train_samples)
+        else:
+            ct_target_stats = fit_ct_delta_preprocessor(train_samples)
 
     model = instantiate_model(tree_data, static_x, artifact_config).to(device)
     optimizer = optim.Adam(
