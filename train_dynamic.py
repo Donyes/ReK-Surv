@@ -731,6 +731,26 @@ def evaluate_windows(
     return records, mean_ctd
 
 
+def mean_window_metric(records: Sequence[Dict[str, float]], metric_key: str) -> float | None:
+    valid_values = [float(record[metric_key]) for record in records if np.isfinite(record[metric_key])]
+    if len(valid_values) == 0:
+        return None
+    return float(np.mean(valid_values))
+
+
+def summarize_window_group(group: pd.DataFrame) -> Dict[str, float]:
+    return {
+        "eligible_n_mean": float(group["eligible_n"].mean()),
+        "eligible_n_std": float(group["eligible_n"].std(ddof=0)),
+        "future_event_n_mean": float(group["future_event_n"].mean()),
+        "future_event_n_std": float(group["future_event_n"].std(ddof=0)),
+        "ctd_mean": float(group["ctd"].mean(skipna=True)),
+        "ctd_std": float(group["ctd"].std(skipna=True, ddof=0)),
+        "bstd_mean": float(group["bstd"].mean(skipna=True)),
+        "bstd_std": float(group["bstd"].std(skipna=True, ddof=0)),
+    }
+
+
 def run_repeat(
     repeat_index: int,
     args: argparse.Namespace,
@@ -834,7 +854,6 @@ def run_repeat(
     best_state = None
     best_epoch = 0
     best_val_ctd = float("-inf")
-    best_val_records: List[Dict[str, float]] = []
     best_val_prefix_metrics: Dict[str, float | None] = {}
     no_improve = 0
     history = []
@@ -952,7 +971,6 @@ def run_repeat(
         if should_update_best:
             best_val_ctd = val_ctd
             best_epoch = epoch
-            best_val_records = val_records
             best_val_prefix_metrics = dict(val_prefix_metrics)
             best_state = {key: value.detach().cpu().clone() for key, value in model.state_dict().items()}
             no_improve = 0
@@ -995,6 +1013,24 @@ def run_repeat(
         raise RuntimeError("Training did not produce a valid checkpoint.")
 
     model.load_state_dict(best_state)
+    train_records, _ = evaluate_windows(
+        model=model,
+        tree_data=tree_data,
+        static_x=static_x,
+        evaluation_indices=train_indices,
+        train_indices=train_indices,
+        window_specs=window_specs,
+        device=device,
+    )
+    val_records, _ = evaluate_windows(
+        model=model,
+        tree_data=tree_data,
+        static_x=static_x,
+        evaluation_indices=val_indices,
+        train_indices=train_indices,
+        window_specs=window_specs,
+        device=device,
+    )
     test_records, _ = evaluate_windows(
         model=model,
         tree_data=tree_data,
@@ -1004,6 +1040,18 @@ def run_repeat(
         window_specs=window_specs,
         device=device,
     )
+    split_window_metrics = {
+        "train": train_records,
+        "val": val_records,
+        "test": test_records,
+    }
+    split_mean_metrics = {
+        split_name: {
+            "ctd_mean": mean_window_metric(records, "ctd"),
+            "bstd_mean": mean_window_metric(records, "bstd"),
+        }
+        for split_name, records in split_window_metrics.items()
+    }
 
     repeat_dir = output_root / f"repeat_{repeat_index}"
     repeat_dir.mkdir(parents=True, exist_ok=True)
@@ -1071,9 +1119,12 @@ def run_repeat(
         "static_feature_dim": int(static_x.shape[1]),
         "static_feature_names": static_feature_names,
         "history": history,
-        "validation_windows": best_val_records,
+        "train_windows": train_records,
+        "validation_windows": val_records,
         "best_validation_prefix_metrics": best_val_prefix_metrics_payload,
         "test_windows": test_records,
+        "split_window_metrics": split_window_metrics,
+        "split_mean_metrics": split_mean_metrics,
     }
     if is_window_delta_lod_ct_mode(args.ct_aux_target_mode):
         metrics_payload.update(
@@ -1117,15 +1168,17 @@ def run_repeat(
         json.dump(to_serializable(metrics_payload), file, ensure_ascii=False, indent=2)
 
     flat_records = []
-    for record in test_records:
-        flat_records.append(
-            {
-                "repeat": repeat_index,
-                "seed": repeat_seed,
-                "best_epoch": best_epoch,
-                **record,
-            }
-        )
+    for split_name, split_records in split_window_metrics.items():
+        for record in split_records:
+            flat_records.append(
+                {
+                    "repeat": repeat_index,
+                    "seed": repeat_seed,
+                    "best_epoch": best_epoch,
+                    "split": split_name,
+                    **record,
+                }
+            )
     return flat_records
 
 
@@ -1135,29 +1188,36 @@ def summarize_results(
     output_root: Path,
 ) -> None:
     summary_df = pd.DataFrame(all_records)
-    summary_df = summary_df.sort_values(["landmark", "pred_horizon", "repeat"]).reset_index(drop=True)
+    summary_df = summary_df.sort_values(["split", "landmark", "pred_horizon", "repeat"]).reset_index(drop=True)
     summary_df.to_csv(output_root / "summary.csv", index=False)
 
-    windows = []
-    for (landmark, pred_horizon), group in summary_df.groupby(["landmark", "pred_horizon"], sort=True):
-        windows.append(
-            {
-                "landmark": int(landmark),
-                "pred_horizon": int(pred_horizon),
-                "eligible_n_mean": float(group["eligible_n"].mean()),
-                "eligible_n_std": float(group["eligible_n"].std(ddof=0)),
-                "future_event_n_mean": float(group["future_event_n"].mean()),
-                "future_event_n_std": float(group["future_event_n"].std(ddof=0)),
-                "ctd_mean": float(group["ctd"].mean(skipna=True)),
-                "ctd_std": float(group["ctd"].std(skipna=True, ddof=0)),
-                "bstd_mean": float(group["bstd"].mean(skipna=True)),
-                "bstd_std": float(group["bstd"].std(skipna=True, ddof=0)),
-            }
-        )
+    split_summaries: Dict[str, Dict[str, object]] = {}
+    for split_name, split_group in summary_df.groupby("split", sort=False):
+        windows = []
+        for (landmark, pred_horizon), group in split_group.groupby(["landmark", "pred_horizon"], sort=True):
+            window_summary = summarize_window_group(group)
+            window_summary.update(
+                {
+                    "landmark": int(landmark),
+                    "pred_horizon": int(pred_horizon),
+                }
+            )
+            windows.append(window_summary)
+        split_summaries[str(split_name)] = {
+            "overall": {
+                "ctd_mean": float(split_group["ctd"].mean(skipna=True)),
+                "ctd_std": float(split_group["ctd"].std(skipna=True, ddof=0)),
+                "bstd_mean": float(split_group["bstd"].mean(skipna=True)),
+                "bstd_std": float(split_group["bstd"].std(skipna=True, ddof=0)),
+            },
+            "windows": windows,
+        }
 
     summary_payload = {
         "config": vars(args),
-        "windows": windows,
+        "overall": {split_name: split_summary["overall"] for split_name, split_summary in split_summaries.items()},
+        "splits": split_summaries,
+        "windows": split_summaries.get("test", {}).get("windows", []),
     }
     with open(output_root / "summary.json", "w", encoding="utf-8") as file:
         json.dump(to_serializable(summary_payload), file, ensure_ascii=False, indent=2)

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(python train_dynamic.py --model_type trigger_orchard_v3 --use_ct_aux_task --window_pairs 4:3 6:3 --cv_mode kfold --n_folds 3 --n_cv_repeats 1 --inner_val_ratio 0.125 --epochs 2 --patience 5 --batch_size 32 --output_dir artifacts/_smoke_kfold --seed 42)",
+      "Bash(python -c \"import torch; print\\('CUDA available:', torch.cuda.is_available\\(\\)\\); print\\('device:', 'cuda' if torch.cuda.is_available\\(\\) else 'cpu'\\)\")"
+    ]
+  }
+}

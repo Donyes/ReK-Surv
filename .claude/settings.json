@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(conda env list*)",
+      "Bash(conda config --show*)",
+      "Bash(conda --version*)",
+      "Bash(conda info*)",
+      "Bash(pip list*)",
+      "Bash(pip show*)",
+      "Bash(curl *)",
+      "Bash(python -c \"import train_dynamic; print\\('train_dynamic imports OK'\\); from utils.cv_splits import build_kfold_splits; print\\('cv_splits OK'\\)\")"
+    ]
+  }
+}
