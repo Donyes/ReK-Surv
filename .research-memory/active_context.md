@@ -1,6 +1,6 @@
 # Active Context
 
-- Updated: 2026-05-06T02:18:11+08:00
-- Current focus: Confirmed trigger_orchard_v3 overfitting from split-wise Ctd/Bstd
-- Latest outcome: This session added split-aware result recording for dynamic experiments and used train, validation, and test Ctd/Bstd to diagnose generalization. Stable result: the trigger_orchard_v3 delta+LOD original full5 run shows a clear train-versus-val/test gap, so the current issue is real overfitting rather than a reporting bug.
-- Main blocker: The trigger_orchard_v3 branch has a confirmed train-versus-val/test generalization gap on the 123-sample regime, and any next variant must reduce that gap without sacrificing test Ctd.
+- Updated: 2026-05-16T00:00:00+08:00
+- Current focus: Running trigger_orchard_v3 T1-A dropout regularization under the existing shared-split full5 hold-out protocol.
+- Latest outcome: Added a `--v3_dropout` switch for trigger_orchard_v3 MLP blocks while preserving default behavior at 0.0; `train_dynamic.py --help`, py_compile, and a 1-epoch v3 delta+LOD smoke run with `--v3_dropout 0.1` succeeded.
+- Main blocker: The full5 dropout scan still needs to be run for p values such as 0.1, 0.2, and 0.3, then judged against train/val/test split gaps, test Ctd, and the unstable 8:5 Bstd window.

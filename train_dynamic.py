@@ -128,6 +128,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--ct_aux_loss", type=str, default="huber", choices=["huber", "mse"], help="Loss type for the CT auxiliary head")
     parser.add_argument("--lag_spread_weight", type=float, default=0.01, help="Weight for the period-attention spread regularizer")
     parser.add_argument("--tree_attention_dropout", type=float, default=0.10, help="Dropout inside the tree-specific period attention scorer")
+    parser.add_argument("--v3_dropout", type=float, default=0.0, help="Dropout probability for trigger_orchard_v3 MLP blocks")
     parser.add_argument("--static_attention_dim", type=int, default=32, help="Hidden size for static-conditioned attention encoders")
     parser.add_argument("--weight_decay", type=float, default=1e-4, help="Weight decay")
     parser.add_argument("--output_dir", type=str, default="artifacts/dynamic_hlb", help="Directory for dynamic experiment outputs")
@@ -149,6 +150,8 @@ def parse_args() -> argparse.Namespace:
         args.gamma_env = 0.0
     if args.model_type != "legacy":
         args.use_time_features = False
+    if not 0.0 <= args.v3_dropout < 1.0:
+        raise ValueError("--v3_dropout must be in the range [0, 1).")
     configure_model_data_settings(args)
     return args
 
@@ -394,6 +397,7 @@ def instantiate_model(args: argparse.Namespace, tree_data, static_x: np.ndarray)
         period_end_day_index=tree_data.period_end_day_index,
         env_aux_mode=args.env_aux_mode,
         tree_attention_dropout=args.tree_attention_dropout,
+        v3_dropout=args.v3_dropout,
         static_attention_dim=args.static_attention_dim,
         ct_delta_output_dim=getattr(args, "ct_delta_output_dim", 1),
         ct_aux_output_dim=getattr(args, "ct_aux_output_dim", 1),
@@ -1109,6 +1113,7 @@ def run_repeat(
         "env_aux_mode": args.env_aux_mode,
         "lag_spread_weight": float(args.lag_spread_weight),
         "tree_attention_dropout": float(args.tree_attention_dropout),
+        "v3_dropout": float(args.v3_dropout),
         "static_attention_dim": int(args.static_attention_dim),
         "train_landmark_subset": None if args.train_landmark_subset is None else [int(value) for value in args.train_landmark_subset],
         "early_stop_window_specs": [list(spec) for spec in early_stop_window_specs],
@@ -1289,6 +1294,8 @@ def main() -> None:
         f"| Period features: {args.period_feature_mode} | Env aux: {args.env_aux_mode} "
         f"| Tree spatial: {args.use_tree_id_spatial}"
     )
+    if args.model_type == "trigger_orchard_v3":
+        print(f"trigger_orchard_v3 dropout: {args.v3_dropout:.3f}")
     if is_window_delta_lod_ct_mode(args.ct_aux_target_mode):
         print(
             f"CT auxiliary task: {'on' if args.use_ct_aux_task else 'off'} | "

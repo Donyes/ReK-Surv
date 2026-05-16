@@ -55,6 +55,7 @@ class DynamicReKSurv(nn.Module):
         env_aux_mode: str = "next_day",
         trigger_topk: int = 5,
         tree_attention_dropout: float = 0.10,
+        v3_dropout: float = 0.0,
         static_attention_dim: int = 32,
         ct_delta_output_dim: int | None = None,
         ct_aux_output_dim: int | None = None,
@@ -158,6 +159,7 @@ class DynamicReKSurv(nn.Module):
                 ct_aux_output_dim=self.ct_aux_output_dim,
                 ct_delta_output_dim=self.ct_delta_output_dim,
                 ct_state_output_dim=self.ct_state_output_dim,
+                v3_dropout=v3_dropout,
             )
         else:
             raise ValueError(f"Unsupported model type: {model_type}")
@@ -384,9 +386,15 @@ class DynamicReKSurv(nn.Module):
         ct_aux_output_dim: int,
         ct_delta_output_dim: int,
         ct_state_output_dim: int,
+        v3_dropout: float = 0.0,
     ) -> None:
         kernel_sizes = [7, 14, 30, 60]
         branch_hidden = max(hidden_size // len(kernel_sizes), 8)
+        v3_dropout_p = float(v3_dropout) if self.model_type == "trigger_orchard_v3" else 0.0
+        self.trigger_daily_hidden_dropout = nn.Dropout(v3_dropout_p)
+        self.trigger_daily_output_dropout = nn.Dropout(v3_dropout_p)
+        self.expert_window_dropout = nn.Dropout(v3_dropout_p)
+        self.trigger_ct_head_dropout = nn.Dropout(v3_dropout_p)
 
         self.trigger_input_proj = nn.Linear(self.env_dim, projection_dim)
         self.trigger_convs = nn.ModuleList(
@@ -494,6 +502,26 @@ class DynamicReKSurv(nn.Module):
                 nn.ReLU(),
                 nn.Linear(projection_dim, ct_aux_output_dim),
             )
+
+    def _encode_trigger_orchard_v2_daily(self, daily_input: torch.Tensor) -> torch.Tensor:
+        hidden = self.trigger_daily_encoder[0](daily_input)
+        hidden = self.trigger_daily_encoder[1](hidden)
+        hidden = self.trigger_daily_hidden_dropout(hidden)
+        hidden = self.trigger_daily_encoder[2](hidden)
+        return self.trigger_daily_output_dropout(hidden)
+
+    def _project_trigger_orchard_v2_window(self, expert_index: int, window_input: torch.Tensor) -> torch.Tensor:
+        projector = self.expert_window_projectors[expert_index]
+        hidden = projector[0](window_input)
+        hidden = projector[1](hidden)
+        hidden = self.expert_window_dropout(hidden)
+        return projector[2](hidden)
+
+    def _predict_trigger_orchard_v2_ct(self, head: nn.Sequential, head_input: torch.Tensor) -> torch.Tensor:
+        hidden = head[0](head_input)
+        hidden = head[1](hidden)
+        hidden = self.trigger_ct_head_dropout(hidden)
+        return head[2](hidden)
 
     def forward(
         self,
@@ -935,7 +963,7 @@ class DynamicReKSurv(nn.Module):
             kernel_size = int(conv.kernel_size[0])
             padded = F.pad(conv_input, (kernel_size - 1, 0))
             conv_outputs.append(F.relu(conv(padded)).transpose(1, 2))
-        day_hidden = self.trigger_daily_encoder(torch.cat([base] + conv_outputs, dim=-1))
+        day_hidden = self._encode_trigger_orchard_v2_daily(torch.cat([base] + conv_outputs, dim=-1))
 
         window_starts = self.trigger_window_start_index.to(daily_env_prefix.device)
         window_ends = self.trigger_window_end_index.to(daily_env_prefix.device)
@@ -989,7 +1017,7 @@ class DynamicReKSurv(nn.Module):
                 ],
                 dim=-1,
             )
-            window_tokens = self.expert_window_projectors[expert_index](window_token_input)
+            window_tokens = self._project_trigger_orchard_v2_window(expert_index, window_token_input)
             tree_query = F.normalize(self.expert_query_projectors[expert_index](static_x), dim=1)
             window_keys = F.normalize(window_tokens, dim=-1)
             scores = (window_keys * tree_query.unsqueeze(1)).sum(dim=-1)
@@ -1032,15 +1060,15 @@ class DynamicReKSurv(nn.Module):
         )
         ct_head_input = torch.cat([head_input, landmark_summary], dim=1)
         if self.model_type == "trigger_orchard_v3" and self.ct_aux_target_mode == "window_endpoint_heads":
-            pred_ct_state_logits = self.trigger_ct_state_head(ct_head_input)
-            pred_ct_value = self.trigger_ct_value_head(ct_head_input)
+            pred_ct_state_logits = self._predict_trigger_orchard_v2_ct(self.trigger_ct_state_head, ct_head_input)
+            pred_ct_value = self._predict_trigger_orchard_v2_ct(self.trigger_ct_value_head, ct_head_input)
             pred_ct_delta = None
         elif self.model_type == "trigger_orchard_v3" and self.ct_aux_target_mode == "window_prefix_vector_with_endpoint_lod":
-            pred_ct_state_logits = self.trigger_ct_state_head(ct_head_input)
-            pred_ct_delta = self.trigger_ct_delta_head(ct_head_input)
+            pred_ct_state_logits = self._predict_trigger_orchard_v2_ct(self.trigger_ct_state_head, ct_head_input)
+            pred_ct_delta = self._predict_trigger_orchard_v2_ct(self.trigger_ct_delta_head, ct_head_input)
             pred_ct_value = None
         else:
-            pred_ct_delta = self.trigger_ct_aux_head(ct_head_input)
+            pred_ct_delta = self._predict_trigger_orchard_v2_ct(self.trigger_ct_aux_head, ct_head_input)
             pred_ct_state_logits = None
             pred_ct_value = None
         output = self._finalize_outputs(
